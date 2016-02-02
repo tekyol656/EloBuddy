@@ -13,6 +13,7 @@ namespace Aka_s_Vayne_reworked
     class MenuManager
     {
         public static Menu VMenu,
+            Qsettings,
             ComboMenu,
             CondemnMenu,
             HarassMenu,
@@ -21,13 +22,13 @@ namespace Aka_s_Vayne_reworked
             JungleClearMenu,
             MiscMenu,
             ItemMenu,
-            MechanicMenu,
             DrawingMenu;
 
         public static void Load()
         {
             Mainmenu();
             Combomenu();
+            QSettings();
             Condemnmenu();
             Harassmenu();
             Fleemenu();
@@ -35,7 +36,6 @@ namespace Aka_s_Vayne_reworked
             JungleClearmenu();
             Miscmenu();
             Itemmenu();
-            Mechanicmenu();
             Drawingmenu();
         }
 
@@ -51,34 +51,67 @@ namespace Aka_s_Vayne_reworked
             ComboMenu = VMenu.AddSubMenu("Combo", "Combo");
             ComboMenu.AddGroupLabel("Combo");
             ComboMenu.AddGroupLabel("Q Mode");
-            ComboMenu.AddLabel("1: Mouse 2: Smart 3: Kite Melees");
-            ComboMenu.Add("Qmode", new Slider("Q Mode", 2, 1, 3));
-            ComboMenu.AddLabel("Smart: 1: Aggressive  2: Defensive");
-            ComboMenu.Add("Qmode2", new Slider("Smart Mode", 1, 1, 2));
-            ComboMenu.Add("UseQb", new CheckBox("Use Q before AA?", false));
-            ComboMenu.Add("UseQa", new CheckBox("Use Q after AA?"));
-            ComboMenu.AddGroupLabel("Q Settings");
-            ComboMenu.Add("UseSafeQ", new CheckBox("Dynamic Q Safety?", false));
-            ComboMenu.Add("UseQE", new CheckBox("Dont Q into enemies?", false));
-            ComboMenu.Add("QE", new CheckBox("Try to QE?", false));
-            ComboMenu.Add("UseQspam", new CheckBox("Ignore checks", false));
-            ComboMenu.AddLabel("In Burstmode Vayne will Tumble in Walls for a faster Reset.");
-            ComboMenu.Add("Mirin", new CheckBox("Burstmode"));
-          ComboMenu.AddGroupLabel("AA Resets");
-          ComboMenu.AddLabel("Once you untick´d the AA Reset you have to reload[F5]");
-          ComboMenu.Add("AAReset", new CheckBox("Use my AA Reset"));
-          ComboMenu.AddLabel("If your AA´s Cancel use this, or deactivate my AA Reset.");
-          ComboMenu.Add("AACancel", new Slider("AA Cancel", 0, 0, 20));
+            var qmode = ComboMenu.Add("Qmode", new ComboBox("Q Mode", 1, "Mouse", "Smart", "Kite", "Old"));
+            qmode.OnValueChange += delegate
+            {
+                if (qmode.CurrentValue == 1)
+                {
+                    Qsettings["UseSafeQ"].IsVisible = true;
+                    Qsettings["UseQE"].IsVisible = true;
+                    Qsettings["QE"].IsVisible = true;
+                    Qsettings["UseQspam"].IsVisible = true;
+                }
+                if (qmode.CurrentValue == 3)
+                {
+                    Qsettings["UseSafeQ"].IsVisible = false;
+                    Qsettings["UseQE"].IsVisible = false;
+                    Qsettings["QE"].IsVisible = false;
+                    Qsettings["UseQspam"].IsVisible = false;
+                }
+                if (qmode.CurrentValue == 2)
+                {
+                    Qsettings["UseSafeQ"].IsVisible = false;
+                    Qsettings["UseQE"].IsVisible = false;
+                    Qsettings["QE"].IsVisible = false;
+                    Qsettings["UseQspam"].IsVisible = false;
+                }
+                if (qmode.CurrentValue == 0)
+                {
+                    Qsettings["UseSafeQ"].IsVisible = false;
+                    Qsettings["UseQE"].IsVisible = false;
+                    Qsettings["QE"].IsVisible = false;
+                    Qsettings["UseQspam"].IsVisible = false;
+                }
+            };
+            ComboMenu.Add("Qmode2", new ComboBox("Smart Mode", 0, "Aggressive", "Defensive"));
+            ComboMenu.Add("UseQwhen", new ComboBox("Use Q", 0, "After Attack", "Before Attack"));
+            ComboMenu.AddGroupLabel("AA Resets");
+            ComboMenu.AddLabel("Once you untick´d the AA Reset you have to reload[F5]");
+            ComboMenu.Add("AAReset", new CheckBox("Use my AA Reset"));
+            ComboMenu.AddLabel("If your AA´s Cancel use this, or deactivate my AA Reset.");
+            ComboMenu.Add("AACancel", new Slider("AA Cancel", 0, 0, 20));
             ComboMenu.AddGroupLabel("W Settings");
             ComboMenu.Add("focusw", new CheckBox("Focus W", false));
             ComboMenu.AddGroupLabel("E Settings");
             ComboMenu.Add("Ekill", new CheckBox("Use E if killable?"));
-            ComboMenu.Add("comboUseE", new CheckBox("Use E", false));
+            ComboMenu.Add("comboUseE", new CheckBox("Use E"));
             ComboMenu.AddGroupLabel("R Settings");
             ComboMenu.Add("comboUseR", new CheckBox("Use R", false));
+            ComboMenu.Add("comboRSlider", new Slider("Use R if", 2, 1, 5));
             ComboMenu.Add("RnoAA", new CheckBox("No AA while stealth", false));
             ComboMenu.Add("RnoAAs", new Slider("No AA stealth when >= enemy in range", 2, 0, 5));
-            ComboMenu.Add("comboRSlider", new Slider("Use R if", 2, 1, 5));
+        }
+
+        public static void QSettings()
+        {
+            Qsettings = VMenu.AddSubMenu("Q Settings", "Q Settings");
+            Qsettings.AddGroupLabel("Q Settings");
+            Qsettings.AddLabel("In Burstmode Vayne will Tumble in Walls for a faster Reset.");
+            Qsettings.Add("Mirin", new CheckBox("Burstmode"));
+            Qsettings.Add("UseSafeQ", new CheckBox("Dynamic Q Safety?", false)).IsVisible = true;
+            Qsettings.Add("UseQE", new CheckBox("Dont Q into enemies?", false)).IsVisible = true;
+            Qsettings.Add("QE", new CheckBox("Try to QE?", false)).IsVisible = true;
+            Qsettings.Add("UseQspam", new CheckBox("Ignore checks", false)).IsVisible = true;
         }
 
         public static void Condemnmenu()
@@ -86,13 +119,17 @@ namespace Aka_s_Vayne_reworked
             CondemnMenu = VMenu.AddSubMenu("Condemn", "Condemn");
             CondemnMenu.AddGroupLabel("Condemn");
             CondemnMenu.AddLabel("1:Best 2:New 3:Marksman 4:Shine");
-            CondemnMenu.Add("Condemnmode", new Slider("Condemn Mode", 1, 1, 4));
+            CondemnMenu.Add("Condemnmode", new ComboBox("Condemn Mode", 0, "Best", "New", "Marksman", "Shine"));
             CondemnMenu.Add("UseEauto", new CheckBox("Use auto E?"));
             CondemnMenu.Add("UseEc", new CheckBox("Only Stun current target?", false));
             CondemnMenu.Add("condemnPercent", new Slider("Condemn Hitchance %", 33, 1));
+            CondemnMenu.Add("pushDistance", new Slider("Condemn Push Distance", 420, 350, 470));
             CondemnMenu.Add("noeaa", new Slider("No E if target can be killed with x AA´s", 0, 0, 4));
             CondemnMenu.Add("trinket", new CheckBox("Use trinket bush?"));
-            CondemnMenu.Add("pushDistance", new Slider("Condemn Push Distance", 420, 350, 470));
+            CondemnMenu.AddGroupLabel("Mechanics");
+            CondemnMenu.Add("flashe", new KeyBind("Flash Condemn!", false, KeyBind.BindTypes.HoldActive, 'Y'));
+            CondemnMenu.Add("insece", new KeyBind("Flash Insec!", false, KeyBind.BindTypes.HoldActive, 'Z'));
+            CondemnMenu.Add("insecmodes", new ComboBox("Insec Mode", 0, "To Allys", "To Tower", "To Mouse"));
         }
 
         public static void Harassmenu()
@@ -120,6 +157,7 @@ namespace Aka_s_Vayne_reworked
             LaneClearMenu.AddGroupLabel("LaneClear");
             LaneClearMenu.Add("LCQ", new CheckBox("Use Q"));
             LaneClearMenu.Add("LCQMana", new Slider("Maximum mana usage in percent ({0}%)", 40));
+
         }
 
         public static void JungleClearmenu()
@@ -137,19 +175,27 @@ namespace Aka_s_Vayne_reworked
             MiscMenu.AddLabel("Credits to Fluxy:");
             MiscMenu.Add("GapcloseE", new CheckBox("Gapclose E"));
             MiscMenu.Add("AntiRengar", new CheckBox("Anti Rengar"));
-            MiscMenu.Add("AntiKalista", new CheckBox("Anti Kalista"));
             MiscMenu.Add("AntiPanth", new CheckBox("Anti Pantheon"));
             MiscMenu.Add("fpsdrop", new CheckBox("Anti Fps Drop", false));
             MiscMenu.Add("InterruptE", new CheckBox("Interrupt Spells using E?"));
             MiscMenu.Add("LowLifeE", new CheckBox("Low Life E", false));
-            var dangerSlider = MiscMenu.Add("dangerLevel", new Slider("Set Your Danger Level: ", 3, 1, 3));
-            var dangerSliderDisplay = MiscMenu.Add("dangerLevelDisplay",
-                new Label("Danger Level: " + Variables.DangerSliderValues[dangerSlider.Cast<Slider>().CurrentValue - 1]));
-            dangerSlider.Cast<Slider>().OnValueChange += delegate
+            MiscMenu.Add("dangerLevel", new ComboBox("Interrupt E Dangerlevel ", 2, "Low", "Medium", "High"));
+            MiscMenu.AddGroupLabel("Utility");
+            MiscMenu.Add("skinhack", new CheckBox("Activate Skin hack"));
+            MiscMenu.Add("skinId", new ComboBox("Skin Hack", 0, "Default", "Vindicator", "Aristocrat", "Dragonslayer", "Heartseeker", "SKT T1", "Arclight", "Vayne Chroma Green", "Vayne Chroma Red", "Vayne Chroma Grey"));
+            MiscMenu.Add("autolvl", new CheckBox("Activate Auto level"));
+            MiscMenu.Add("autolvls", new ComboBox("Level Mode", 0, "Max W", "Max Q(my style)"));
+            MiscMenu.Add("autobuy", new CheckBox("Autobuy Starters"));
+            MiscMenu.Add("autobuyt", new CheckBox("Autobuy Trinkets", false));
+            switch (MiscMenu["autolvls"].Cast<ComboBox>().CurrentValue)
             {
-                dangerSliderDisplay.Cast<Label>().DisplayName =
-                    "Danger Level: " + Variables.DangerSliderValues[dangerSlider.Cast<Slider>().CurrentValue - 1];
-            };
+                case 0:
+                    Variables.AbilitySequence = new[] { 1, 3, 2, 2, 2, 4, 2, 1, 2, 1, 4, 1, 1, 3, 3, 4, 3, 3 };
+                    break;
+                case 1:
+                    Variables.AbilitySequence = new[] { 1, 3, 2, 1, 1, 4, 1, 2, 1, 2, 4, 2, 2, 3, 3, 4, 3, 3 };
+                    break;
+            }
         }
 
         public static void Itemmenu()
@@ -189,35 +235,9 @@ namespace Aka_s_Vayne_reworked
                 new CheckBox("Taunt"));
             ItemMenu.Add("Suppression",
                 new CheckBox("Suppression"));
-        }
 
-        public static void Mechanicmenu()
-        {
-            MechanicMenu = VMenu.AddSubMenu("Extras", "Extras");
-            MechanicMenu.AddGroupLabel("Mechanics");
-            MechanicMenu.Add("flashe", new KeyBind("Flash Condemn!", false, KeyBind.BindTypes.HoldActive, 'Y'));
-            MechanicMenu.Add("insece", new KeyBind("Flash Insec!", false, KeyBind.BindTypes.HoldActive, 'Z'));
-            MechanicMenu.AddLabel("1: To Allys 2: To Tower 3: To Mouse");
-            MechanicMenu.Add("insecmodes", new Slider("Insec Mode", 1, 1, 3));
-            MechanicMenu.AddGroupLabel("Utility");
-            MechanicMenu.Add("skinhack", new CheckBox("Activate Skin hack"));
-            MechanicMenu.Add("skinId", new Slider("Skin Hack", 0, 0, 9));
-            MechanicMenu.Add("autobuy", new CheckBox("Autobuy Starters"));
-            MechanicMenu.Add("autobuyt", new CheckBox("Autobuy Trinkets", false));
-            MechanicMenu.AddLabel("1: Max W 2: Max Q(my style :3)");
-            MechanicMenu.Add("autolvl", new CheckBox("Activate Auto level"));
-            MechanicMenu.Add("autolvls", new Slider("Level Mode", 1, 1, 2));
-            switch (MechanicMenu["autolvls"].Cast<Slider>().CurrentValue)
-            {
-                case 1:
-                    Variables.AbilitySequence = new[] { 1, 3, 2, 2, 2, 4, 2, 1, 2, 1, 4, 1, 1, 3, 3, 4, 3, 3 };
-                    break;
-                case 2:
-                    Variables.AbilitySequence = new[] { 1, 3, 2, 1, 1, 4, 1, 2, 1, 2, 4, 2, 2, 3, 3, 4, 3, 3 };
-                    break;
-            }
         }
-
+      
         public static void Drawingmenu()
         {
             DrawingMenu = VMenu.AddSubMenu("Drawings", "Drawings");
@@ -226,6 +246,5 @@ namespace Aka_s_Vayne_reworked
             DrawingMenu.Add("DrawE", new CheckBox("Draw E", false));
             DrawingMenu.Add("DrawOnlyReady", new CheckBox("Draw Only if Spells are ready"));
         }
-
     }
 }

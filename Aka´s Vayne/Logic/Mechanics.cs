@@ -18,7 +18,7 @@ namespace Aka_s_Vayne_reworked.Logic
             foreach (var p in positions)
             {
                 var condemnUnit = CondemnCheck(p);
-                if (condemnUnit != null && MenuManager.MechanicMenu["flashe"].Cast<KeyBind>().CurrentValue)
+                if (condemnUnit != null && MenuManager.CondemnMenu["flashe"].Cast<KeyBind>().CurrentValue)
                 {
                     Program.E.Cast(condemnUnit);
 
@@ -30,9 +30,9 @@ namespace Aka_s_Vayne_reworked.Logic
 
         public static void Insec()
         {
-            if (!MenuManager.MechanicMenu["insece"].Cast<KeyBind>().CurrentValue) return;
+            if (!MenuManager.CondemnMenu["insece"].Cast<KeyBind>().CurrentValue) return;
 
-            var mode = (MenuManager.MechanicMenu["insecmodes"].Cast<Slider>().CurrentValue);
+            var mode = (MenuManager.CondemnMenu["insecmodes"].Cast<ComboBox>().CurrentValue);
             var target = TargetSelector.GetTarget((int)Variables._Player.GetAutoAttackRange(),
     DamageType.Physical);
             if (target != null)
@@ -41,7 +41,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 bool caninsec = Variables._Player.Distance(target) <= 400;
                 switch (mode)
                 {
-                    case 1:
+                    case 0:
                         var hero =
                             EntityManager.Heroes.Allies.Where(x => !x.IsMe && !x.IsDead)
                                 .OrderByDescending(x => x.Distance(Variables._Player.Position))
@@ -64,7 +64,7 @@ namespace Aka_s_Vayne_reworked.Logic
                             }
                         }
                         break;
-                    case 2:
+                    case 1:
                         var turret =
                             ObjectManager.Get<Obj_AI_Turret>()
                                 .Where(x => x.IsAlly && !x.IsDead)
@@ -88,7 +88,7 @@ namespace Aka_s_Vayne_reworked.Logic
                             }
                         }
                         break;
-                    case 3:
+                    case 2:
                         if (caninsec &&
                             Variables._Player.ServerPosition.Distance(Game.CursorPos) + 100 >=
                             target.Distance(Game.CursorPos))

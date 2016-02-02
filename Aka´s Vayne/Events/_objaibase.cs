@@ -14,28 +14,6 @@ namespace Aka_s_Vayne_reworked.Events
     {
         private static float LastCondemnTick = 0f;
 
-        public static void AutoAttack(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (!(sender is AIHeroClient)) return;
-            var target = (AIHeroClient) sender;
-            if (MenuManager.MiscMenu["AntiKalista"].Cast<CheckBox>().CurrentValue && target.IsEnemy &&
-                target.Hero == Champion.Kalista && Program.Q.IsReady())
-            {
-                var pos = (Variables._Player.Position.Extend(Game.CursorPos, 300).Distance(target) <=
-                           Variables._Player.GetAutoAttackRange(target) &&
-                           Variables._Player.Position.Extend(Game.CursorPos, 300).Distance(target) > 100
-                    ? Game.CursorPos
-                    : (Variables._Player.Position.Extend(target.Position, 300).Distance(target) < 100)
-                        ? target.Position
-                        : new Vector3());
-
-                if (Extensions.IsValid(pos))
-                {
-                    Player.CastSpell(SpellSlot.Q, pos);
-                }
-            }
-        }
-
         public static void BuffGain(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
         {
             if (sender.IsMe && args.Buff.Name == "vaynetumblebonus")

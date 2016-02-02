@@ -84,7 +84,6 @@ namespace Aka_s_Vayne_reworked
 
         public static void Obj_Ai_Base_OnBasicAttack(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            _objaibase.AutoAttack(sender, args);
             _objaibase.AutoAttack2(sender, args);
         }
 

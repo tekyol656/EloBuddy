@@ -17,9 +17,11 @@ namespace AddonTemplate.Logic
 
         private static QProvider Provider = new QProvider();
 
+        #region smart
+
         public static Vector3 NewQPrediction()
         {
-            if (!MenuManager.ComboMenu["QE"].Cast<CheckBox>().CurrentValue &&
+            if (!MenuManager.Qsettings["QE"].Cast<CheckBox>().CurrentValue &&
     !Program.E.IsReady())
             {
                 return Vector3.Zero;
@@ -80,16 +82,16 @@ namespace AddonTemplate.Logic
             var normalCheck = (allies + 1 > enemies - lhEnemies);
             var QEnemiesCheck = true;
 
-            if (MenuManager.ComboMenu["UseQE"].Cast<CheckBox>().CurrentValue && noQIntoEnemiesCheck)
+            if (MenuManager.Qsettings["UseQE"].Cast<CheckBox>().CurrentValue && noQIntoEnemiesCheck)
             {
-                if (!MenuManager.ComboMenu["UseQE"].Cast<CheckBox>().CurrentValue)
+                if (!MenuManager.Qsettings["UseQE"].Cast<CheckBox>().CurrentValue)
                 {
                     var Vector2Position = position.To2D();
-                    var enemyPoints = MenuManager.ComboMenu["UseSafeQ"].Cast<CheckBox>().CurrentValue
+                    var enemyPoints = MenuManager.Qsettings["UseSafeQ"].Cast<CheckBox>().CurrentValue
                         ? GetEnemyPoints()
                         : GetEnemyPoints(false);
                     if (enemyPoints.Contains(Vector2Position) &&
-                        !MenuManager.ComboMenu["UseQspam"].Cast<CheckBox>().CurrentValue)
+                        !MenuManager.Qsettings["UseQspam"].Cast<CheckBox>().CurrentValue)
                     {
                         QEnemiesCheck = false;
                     }
@@ -102,7 +104,7 @@ namespace AddonTemplate.Logic
                         !closeEnemies.All(
                             enemy =>
                                 position.CountEnemiesInRange(
-                                    MenuManager.ComboMenu["UseSafeQ"].Cast<CheckBox>().CurrentValue
+                                    MenuManager.Qsettings["UseSafeQ"].Cast<CheckBox>().CurrentValue
                                         ? enemy.AttackRange
                                         : 405f) <= 1))
                     {
@@ -119,7 +121,7 @@ namespace AddonTemplate.Logic
                             !closeEnemies.All(
                                 enemy =>
                                     position.CountEnemiesInRange(
-                                        MenuManager.ComboMenu["UseSafeQ"].Cast<CheckBox>().CurrentValue
+                                        MenuManager.Qsettings["UseSafeQ"].Cast<CheckBox>().CurrentValue
                                             ? enemy.AttackRange
                                             : 405f) <= 1);
                     }
@@ -146,15 +148,15 @@ namespace AddonTemplate.Logic
 
         private static void OnCastTumble(Obj_AI_Base target, Vector3 position)
         {
-            var mode = MenuManager.ComboMenu["Qmode"].Cast<Slider>().CurrentValue;
+            var mode = MenuManager.ComboMenu["Qmode"].Cast<ComboBox>().CurrentValue;
             var afterTumblePosition = ObjectManager.Player.ServerPosition.Extend(position, 300f);
             var distanceToTarget = afterTumblePosition.Distance(target.ServerPosition, true);
             if ((distanceToTarget < Math.Pow(ObjectManager.Player.AttackRange + 65, 2) && distanceToTarget > 110 * 110)
-                || MenuManager.ComboMenu["UseQspam"].Cast<CheckBox>().CurrentValue)
+                || MenuManager.Qsettings["UseQspam"].Cast<CheckBox>().CurrentValue)
             {
                 switch (mode)
                 {
-                    case 2:
+                    case 1:
                         var smartQPosition = NewQPrediction();
                         var smartQCheck = smartQPosition != Vector3.Zero;
                         var QPosition = smartQCheck ? smartQPosition : Game.CursorPos;
@@ -165,11 +167,11 @@ namespace AddonTemplate.Logic
                             CastQ(QPosition2);
                         }
                         break;
-                    case 1:
+                    case 0:
                         //To mouse
                         DefaultQCast(position, target);
                         break;
-                    case 3:
+                    case 2:
                         //Away from melee enemies
                         if (Variables.MeleeEnemiesTowardsMe.Any() &&
                             !Variables.MeleeEnemiesTowardsMe.All(m => m.HealthPercent <= 15))
@@ -188,6 +190,12 @@ namespace AddonTemplate.Logic
                         {
                             DefaultQCast(position, target);
                         }
+                        break;
+                    case 3:
+                        var Target = TargetSelector.GetTarget((int)Variables._Player.GetAutoAttackRange(), DamageType.Physical);
+                        if (Target == null) return;
+                        var tumblePosition = Target.GetTumblePos();
+                        Cast(tumblePosition);
                         break;
                 }
             }
@@ -216,7 +224,7 @@ namespace AddonTemplate.Logic
         {
             var endPosition = Position;
 
-            if (MenuManager.ComboMenu["Mirin"].Cast<CheckBox>().CurrentValue)
+            if (MenuManager.Qsettings["Mirin"].Cast<CheckBox>().CurrentValue)
             {
                 var qBurstModePosition = GetQBurstModePosition();
                 if (qBurstModePosition != null)
@@ -256,5 +264,85 @@ namespace AddonTemplate.Logic
 
             return vList;
         }
+
+        #endregion smart
+
+        #region old
+
+        public static void Cast(Vector3 position)
+        {
+            TumbleOrderPos = position;
+            if (position != Vector3.Zero)
+            {
+                Player.CastSpell(SpellSlot.Q, TumbleOrderPos);
+            }
+        }
+
+        public static Vector3 GetAggressiveTumblePos(this Obj_AI_Base target)
+        {
+            var cursorPos = Game.CursorPos;
+
+            if (!cursorPos.IsDangerousPosition()) return cursorPos;
+            //if the target is not a melee and he's alone he's not really a danger to us, proceed to 1v1 him :^ )
+            if (!target.IsMelee && Variables._Player.CountEnemiesInRange(800) == 1) return cursorPos;
+
+            var aRC = new VHRGeometry.Circle(Variables._Player.ServerPosition.To2D(), 300).ToPolygon().ToClipperPath();
+            var targetPosition = target.ServerPosition;
+
+
+            foreach (var p in aRC)
+            {
+                var v3 = new Vector2(p.X, p.Y).To3D();
+                var dist = v3.Distance(targetPosition);
+                if (dist > 325 && dist < 450)
+                {
+                    return v3;
+                }
+            }
+            return Vector3.Zero;
+        }
+
+        public static Vector3 GetTumblePos(this Obj_AI_Base target)
+        {
+            if (!Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+                return GetAggressiveTumblePos(target);
+
+            var cursorPos = Game.CursorPos;
+
+            if (!cursorPos.IsDangerousPosition()) return cursorPos;
+            //if the target is not a melee and he's alone he's not really a danger to us, proceed to 1v1 him :^ )
+            if (!target.IsMelee && Variables._Player.CountEnemiesInRange(800) == 1) return cursorPos;
+
+            var aRC = new VHRGeometry.Circle(Variables._Player.ServerPosition.To2D(), 300).ToPolygon().ToClipperPath();
+            var targetPosition = target.ServerPosition;
+            var pList =(from p in aRC
+                   select new Vector2(p.X, p.Y).To3D()
+                    into v3
+                   let dist = v3.Distance(targetPosition)
+                   where !v3.IsDangerousPosition() && dist < 500
+                   select v3).ToList();
+
+            if (other.UnderEnemyTower((Vector2) Variables._Player.ServerPosition) || Variables._Player.CountEnemiesInRange(800) == 1 ||
+                cursorPos.CountEnemiesInRange(450) <= 1)
+            {
+                return pList.Count > 1 ? pList.OrderBy(el => el.Distance(cursorPos)).FirstOrDefault() : Vector3.Zero;
+            }
+            return pList.Count > 1
+                ? pList.OrderByDescending(el => el.Distance(cursorPos)).FirstOrDefault()
+                : Vector3.Zero;
+        }
+
+
+        public static bool IsDangerousPosition(this Vector3 pos)
+        {
+            return
+                EntityManager.Heroes.Enemies.Any(
+                    e => e.IsValidTarget() && e.IsVisible &&
+                        e.Distance(pos) < 375) ||
+                Traps.EnemyTraps.Any(t => pos.Distance(t.Position) < 125) ||
+                (other.UnderEnemyTower((Vector2)pos) && !other.UnderEnemyTower((Vector2)Variables._Player.ServerPosition) || (NavMesh.GetCollisionFlags(pos).HasFlag(CollisionFlags.Wall) || NavMesh.GetCollisionFlags(pos).HasFlag(CollisionFlags.Building)));
+        }
+
+        #endregion old
     }
 }

@@ -15,33 +15,33 @@ namespace Aka_s_Vayne_reworked.Modes
             var target = TargetSelector.GetTarget((int)Variables._Player.GetAutoAttackRange(),
     DamageType.Physical);
 
-            UseQ2();
-            UseE3();
+            UseQ();
+            UseE();
             UseR();
             Events._game.FastBotrk();
             UseTrinket(target);
             if (MenuManager.ComboMenu["AAReset"].Cast<CheckBox>().CurrentValue) Events._game.AAReset();
         }
 
-        public static void UseQ2()
+        public static void UseQ()
         {
             var target = TargetSelector.GetTarget((int)Variables._Player.GetAutoAttackRange(), DamageType.Physical);
 
-            if (Functions.Modes.Combo.AfterAttack && MenuManager.ComboMenu["UseQa"].Cast<CheckBox>().CurrentValue)
+            if (Functions.Modes.Combo.AfterAttack && MenuManager.ComboMenu["UseQwhen"].Cast<ComboBox>().CurrentValue == 0)
             {
                 if (target == null) return;
                 QLogic.PreCastTumble(target);
 
             }
 
-            if (Functions.Modes.Combo.BeforeAttack && MenuManager.ComboMenu["UseQb"].Cast<CheckBox>().CurrentValue)
+            if (Functions.Modes.Combo.BeforeAttack && MenuManager.ComboMenu["UseQwhen"].Cast<ComboBox>().CurrentValue == 1)
             {
                 if (target == null) return;
                 QLogic.PreCastTumble(target);
             }
         }
 
-        public static void UseE3()
+        public static void UseE()
         {
             if (Functions.Modes.Combo.AfterAttack && MenuManager.ComboMenu["comboUseE"].Cast<CheckBox>().CurrentValue)
             {

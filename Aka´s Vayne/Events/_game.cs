@@ -12,9 +12,9 @@ namespace Aka_s_Vayne_reworked.Events
     {
         public static void Skinhack()
         {
-            if (MenuManager.MechanicMenu["skinhack"].Cast<CheckBox>().CurrentValue)
+            if (MenuManager.MiscMenu["skinhack"].Cast<CheckBox>().CurrentValue)
             {
-                Player.SetSkinId(MenuManager.MechanicMenu["skinId"].Cast<Slider>().CurrentValue);
+                Player.SetSkinId((int)MenuManager.MiscMenu["skinId"].Cast<ComboBox>().CurrentValue);
             }
         }
 
@@ -48,13 +48,13 @@ DamageType.Physical);
             if (Game.MapId == GameMapId.SummonersRift)
             {
                 if (Variables._Player.IsInShopRange() &&
-                    MenuManager.MechanicMenu["autobuyt"].Cast<CheckBox>().CurrentValue &&
+                    MenuManager.MiscMenu["autobuyt"].Cast<CheckBox>().CurrentValue &&
                     Variables._Player.Level > 9 && Item.HasItem((int) ItemId.Warding_Totem_Trinket))
                 {
                     //Shop.BuyItem(ItemId.Farsight_Orb_Trinket);
                 }
                 if (Variables._Player.IsInShopRange() &&
-                    MenuManager.MechanicMenu["autobuyt"].Cast<CheckBox>().CurrentValue &&
+                    MenuManager.MiscMenu["autobuyt"].Cast<CheckBox>().CurrentValue &&
                     !Item.HasItem((int) ItemId.Sweeping_Lens_Trinket, Variables._Player) && Variables._Player.Level > 6 &&
                     EntityManager.Heroes.Enemies.Any(
                         h =>
@@ -106,7 +106,7 @@ DamageType.Physical);
 
         public static void LevelUpSpells()
         {
-            if (!MenuManager.MechanicMenu["autolvl"].Cast<CheckBox>().CurrentValue) return;
+            if (!MenuManager.MiscMenu["autolvl"].Cast<CheckBox>().CurrentValue) return;
 
             var qL = Variables._Player.Spellbook.GetSpell(SpellSlot.Q).Level + Variables.QOff;
             var wL = Variables._Player.Spellbook.GetSpell(SpellSlot.W).Level + Variables.WOff;
@@ -162,7 +162,7 @@ DamageType.Physical);
 
         public static void autoBuy()
         {
-            if (!MenuManager.MechanicMenu["autobuy"].Cast<CheckBox>().CurrentValue) return;
+            if (!MenuManager.MiscMenu["autobuy"].Cast<CheckBox>().CurrentValue) return;
 
             if (Variables.bought || Variables.ticks/Game.TicksPerSecond < 3)
             {

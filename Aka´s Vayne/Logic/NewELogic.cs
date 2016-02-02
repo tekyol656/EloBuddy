@@ -55,18 +55,18 @@ namespace Aka_s_Vayne_reworked.Logic
 
         public static Obj_AI_Base GetCondemnTarget(Vector3 fromPosition)
         {
-            switch (MenuManager.CondemnMenu["Condemnmode"].Cast<Slider>().CurrentValue)
+            switch (MenuManager.CondemnMenu["Condemnmode"].Cast<ComboBox>().CurrentValue)
             {
-                case 1:
+                case 0:
                     //VH Revolution
                     return Shine.GetTarget(fromPosition);
-                case 2:
+                case 1:
                     //VH Reborn
                     return VHReborn.GetTarget(fromPosition);
-                case 3:
+                case 2:
                     //Marksman / Gosu
                     return Marksman.GetTarget(fromPosition);
-                case 4:
+                case 3:
                     //Shine#
                     return VHRevolution.GetTarget(fromPosition);
             }

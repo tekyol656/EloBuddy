@@ -18,7 +18,7 @@ namespace Aka_s_Vayne_reworked.Events
                 {
                     DangerLevel.Low, DangerLevel.Medium,
                     DangerLevel.High,
-                }[MenuManager.MiscMenu["dangerLevel"].Cast<Slider>().CurrentValue - 1];
+                }[MenuManager.MiscMenu["dangerLevel"].Cast<ComboBox>().CurrentValue - 1];
 
             if (dangerLevel == DangerLevel.Medium && e.DangerLevel.HasFlag(DangerLevel.High) ||
                 dangerLevel == DangerLevel.Low && e.DangerLevel.HasFlag(DangerLevel.High) &&

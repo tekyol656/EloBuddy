@@ -13,6 +13,7 @@ namespace Aka_s_Vayne_reworked
     internal class Program
     {
         public static Spell.Active Q;
+        public static Spell.Skillshot Q2;
         public static Spell.Active W;
         public static Spell.Skillshot E2;
         public static Spell.Targeted E;
@@ -31,6 +32,7 @@ namespace Aka_s_Vayne_reworked
             if (Variables._Player.ChampionName != "Vayne") return;
 
             Q = new Spell.Active(SpellSlot.Q, 300);
+            Q2 = new Spell.Skillshot(SpellSlot.Q, 300, SkillShotType.Linear);
             W = new Spell.Active(SpellSlot.W);
             E = new Spell.Targeted(SpellSlot.E, 590);
             E2 = new Spell.Skillshot(SpellSlot.E, 590, SkillShotType.Linear, 250, 1250);
