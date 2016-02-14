@@ -1,96 +1,66 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
-using EloBuddy.SDK.Enumerations;
-using EloBuddy.SDK.Events;
-using EloBuddy.SDK.Menu;
-using EloBuddy.SDK.Menu.Values;
-using EloBuddy.SDK.Rendering;
 using SharpDX;
 using ClipperLib;
+using System.Text.RegularExpressions;
 
 namespace AkaYasuo
 {
     public enum CollisionObjectTypes
     {
         Minion,
+
         Champion,
-        YasuoWall,
+
+        YasuoWall
     }
 
     internal class FastPredResult
     {
+        #region Fields
+
         public Vector2 CurrentPos;
+
         public bool IsMoving;
+
         public Vector2 PredictedPos;
+
+        #endregion
     }
 
     internal class DetectedCollision
     {
+        #region Fields
+
         public float Diff;
+
         public float Distance;
+
         public Vector2 Position;
+
         public CollisionObjectTypes Type;
+
         public Obj_AI_Base Unit;
+
+        #endregion
     }
 
-    internal static class Collision
+    internal static class Collisions
     {
-        private static int WallCastT;
-        private static Vector2 YasuoWallCastedPos;
+        #region Static Fields
 
-        public static void Init()
-        {
-            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
-        }
+        private static Vector2 wallCastedPos;
 
+        private static int wallCastT;
 
-        private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (sender.IsValid && sender.Team == ObjectManager.Player.Team && args.SData.Name == "YasuoWMovingWall")
-            {
-                WallCastT = Environment.TickCount;
-                YasuoWallCastedPos = sender.ServerPosition.To2D();
-            }
-        }
+        #endregion
 
-        public static FastPredResult FastPrediction(Vector2 from, Obj_AI_Base unit, int delay, int speed)
-        {
-            var tDelay = delay / 1000f + (from.Distance(unit) / speed);
-            var d = tDelay * unit.MoveSpeed;
-            var path = unit.GetWaypoints();
+        #region Public Methods and Operators
 
-            if (path.PathLength() > d)
-            {
-                return new FastPredResult
-                {
-                    IsMoving = true,
-                    CurrentPos = unit.ServerPosition.To2D(),
-                    PredictedPos = path.CutPath((int)d)[0],
-                };
-            }
-            if (path.Count == 0)
-            {
-                return new FastPredResult
-                {
-                    IsMoving = false,
-                    CurrentPos = unit.ServerPosition.To2D(),
-                    PredictedPos = unit.ServerPosition.To2D(),
-                };
-            }
-            return new FastPredResult
-            {
-                IsMoving = false,
-                CurrentPos = path[path.Count - 1],
-                PredictedPos = path[path.Count - 1],
-            };
-        }
-
-        public static Vector2 GetCollisionPoint(Skillshot skillshot)
+        public static Vector2 GetCollisionPoint(this Skillshot skillshot)
         {
             var collisions = new List<DetectedCollision>();
             var from = skillshot.GetMissilePosition(0);
@@ -100,126 +70,106 @@ namespace AkaYasuo
                 switch (cObject)
                 {
                     case CollisionObjectTypes.Minion:
-
-                        foreach (var minion in EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, ObjectManager.Player.ServerPosition ))
-                            
-                        {
-                            var pred = FastPrediction(
-                                from, minion,
-                                Math.Max(0, skillshot.SpellData.Delay - (Environment.TickCount - skillshot.StartTick)),
-                                skillshot.SpellData.MissileSpeed);
-                            var pos = pred.PredictedPos;
-                            var w = skillshot.SpellData.RawRadius +
-                                    (!pred.IsMoving ? (minion.BoundingRadius - 15) : 0) -
-                                    pos.Distance(from, skillshot.End, true);
-                            if (w > 0)
-                            {
-                                collisions.Add(
-                                    new DetectedCollision
-                                    {
-                                        Position =
-                                            pos.ProjectOn(skillshot.End, skillshot.Start).LinePoint +
-                                            skillshot.Direction * 30,
-                                        Unit = minion,
-                                        Type = CollisionObjectTypes.Minion,
-                                        Distance = pos.Distance(from),
-                                        Diff = w,
-                                    });
-                            }
-                        }
-
+                        collisions.AddRange(
+                            from minion in
+                    EntityManager.MinionsAndMonsters.GetLaneMinions(skillshot.Unit.Team == ObjectManager.Player.Team ? EntityManager.UnitTeam.Enemy : EntityManager.UnitTeam.Ally,
+                                    @from.To3D(),
+                                    1200)
+                            let pred =
+                                FastPrediction(
+                                    @from,
+                                    minion,
+                                    Math.Max(
+                                        0,
+                                        skillshot.SpellData.Delay - (Utils.GameTimeTickCount - skillshot.StartTick)),
+                                    skillshot.SpellData.MissileSpeed)
+                            let pos = pred.PredictedPos
+                            let w =
+                                skillshot.SpellData.RawRadius + (!pred.IsMoving ? minion.BoundingRadius - 15 : 0)
+                                - pos.Distance(@from, skillshot.End, true)
+                            where w > 0
+                            select
+                                new DetectedCollision
+                                {
+                                    Position =
+                                            pos.ProjectOn(skillshot.End, skillshot.Start).LinePoint
+                                            + skillshot.Direction * 30,
+                                    Unit = minion,
+                                    Type = CollisionObjectTypes.Minion,
+                                    Distance = pos.Distance(@from),
+                                    Diff = w
+                                });
                         break;
-
                     case CollisionObjectTypes.Champion:
-                        foreach (var hero in
-                            ObjectManager.Get<AIHeroClient>()
-                                .Where(
-                                    h =>
-                                        (h.IsValidTarget(1200) && h.Team == ObjectManager.Player.Team && !h.IsMe ||
-                                         h.Team != ObjectManager.Player.Team)))
-                        {
-                            var pred = FastPrediction(
-                                from, hero,
-                                Math.Max(0, skillshot.SpellData.Delay - (Environment.TickCount - skillshot.StartTick)),
-                                skillshot.SpellData.MissileSpeed);
-                            var pos = pred.PredictedPos;
-
-                            var w = skillshot.SpellData.RawRadius + 30 - pos.Distance(from, skillshot.End, true);
-                            if (w > 0)
-                            {
-                                collisions.Add(
-                                    new DetectedCollision
-                                    {
-                                        Position =
-                                            pos.ProjectOn(skillshot.End, skillshot.Start).LinePoint +
-                                            skillshot.Direction * 30,
-                                        Unit = hero,
-                                        Type = CollisionObjectTypes.Minion,
-                                        Distance = pos.Distance(from),
-                                        Diff = w,
-                                    });
-                            }
-                        }
+                        collisions.AddRange(
+                            from hero in EntityManager.Heroes.Allies.Where(i => i.IsValidTarget(1200, false) && !i.IsMe)
+                            let pred =
+                                FastPrediction(
+                                    @from,
+                                    hero,
+                                    Math.Max(
+                                        0,
+                                        skillshot.SpellData.Delay - (Utils.GameTimeTickCount - skillshot.StartTick)),
+                                    skillshot.SpellData.MissileSpeed)
+                            let pos = pred.PredictedPos
+                            let w = skillshot.SpellData.RawRadius + 30 - pos.Distance(@from, skillshot.End, true)
+                            where w > 0
+                            select
+                                new DetectedCollision
+                                {
+                                    Position =
+                                            pos.ProjectOn(skillshot.End, skillshot.Start).LinePoint
+                                            + skillshot.Direction * 30,
+                                    Unit = hero,
+                                    Type = CollisionObjectTypes.Minion,
+                                    Distance = pos.Distance(@from),
+                                    Diff = w
+                                });
                         break;
-
                     case CollisionObjectTypes.YasuoWall:
                         if (
-                            !ObjectManager.Get<AIHeroClient>()
-                                .Any(
-                                    hero =>
-                                        hero.IsValidTarget(float.MaxValue) &&
-                                        hero.Team == ObjectManager.Player.Team && hero.ChampionName == "Yasuo"))
+                            !EntityManager.Heroes.Allies.Any(
+                                i => i.IsValidTarget(float.MaxValue, false) && i.ChampionName == "Yasuo"))
                         {
                             break;
                         }
-                        GameObject wall = null;
-                        foreach (var gameObject in ObjectManager.Get<GameObject>())
-                        {
-                            if (gameObject.IsValid &&
-                                Object.Equals(
-                                    gameObject.Name, "_w_windwall.\\.troy"
-                                    ))
-                            {
-                                wall = gameObject;
-                            }
-                        }
+                        var wall =
+                            ObjectManager.Get<GameObject>()
+                                .FirstOrDefault(
+                                    i =>
+                                    i.IsValid && Regex.IsMatch(i.Name, "_w_windwall.\\.troy", RegexOptions.IgnoreCase));
                         if (wall == null)
                         {
                             break;
                         }
-                        var level = wall.Name.Substring(wall.Name.Length - 6, 1);
-                        var wallWidth = (300 + 50 * Convert.ToInt32(level));
-
-
-                        var wallDirection = (wall.Position.To2D() - YasuoWallCastedPos).Normalized().Perpendicular();
-                        var wallStart = wall.Position.To2D() + wallWidth / 2 * wallDirection;
+                        var wallWidth = 300 + 50 * Convert.ToInt32(wall.Name.Substring(wall.Name.Length - 6, 1));
+                        var wallDirection = (wall.Position.To2D() - wallCastedPos).Normalized().Perpendicular();
+                        var wallStart = wall.Position.To2D() + wallWidth / 2f * wallDirection;
                         var wallEnd = wallStart - wallWidth * wallDirection;
-                        var wallPolygon = new Geometry.Rectangle(wallStart, wallEnd, 75).ToPolygon();
-                        var intersection = new Vector2();
+                        var wallPolygon = new Geometry.Polygon.Rectangle(wallStart, wallEnd, 75);
                         var intersections = new List<Vector2>();
-
                         for (var i = 0; i < wallPolygon.Points.Count; i++)
                         {
                             var inter =
                                 wallPolygon.Points[i].Intersection(
-                                    wallPolygon.Points[i != wallPolygon.Points.Count - 1 ? i + 1 : 0], from,
+                                    wallPolygon.Points[i != wallPolygon.Points.Count - 1 ? i + 1 : 0],
+                                    from,
                                     skillshot.End);
                             if (inter.Intersects)
                             {
                                 intersections.Add(inter.Point);
                             }
                         }
-
                         if (intersections.Count > 0)
                         {
-                            intersection = intersections.OrderBy(item => item.Distance(from)).ToList()[0];
-                            var collisionT = Environment.TickCount +
-                                             Math.Max(
+                            var intersection = intersections.OrderBy(i => i.Distance(@from)).ToList()[0];
+                            var collisionT = Utils.GameTimeTickCount
+                                             + Math.Max(
                                                  0,
-                                                 skillshot.SpellData.Delay -
-                                                 (Environment.TickCount - skillshot.StartTick)) + 100 +
-                                             (1000 * intersection.Distance(from)) / skillshot.SpellData.MissileSpeed;
-                            if (collisionT - WallCastT < 4000)
+                                                 skillshot.SpellData.Delay
+                                                 - (Utils.GameTimeTickCount - skillshot.StartTick)) + 100
+                                             + (1000 * intersection.Distance(from)) / skillshot.SpellData.MissileSpeed;
+                            if (collisionT - wallCastT < 4000)
                             {
                                 if (skillshot.SpellData.Type != SkillShotType.SkillshotMissileLine)
                                 {
@@ -228,22 +178,57 @@ namespace AkaYasuo
                                 return intersection;
                             }
                         }
-
                         break;
                 }
             }
-
-            Vector2 result;
-            if (collisions.Count > 0)
-            {
-                result = collisions.OrderBy(c => c.Distance).ToList()[0].Position;
-            }
-            else
-            {
-                result = new Vector2();
-            }
-
-            return result;
+            return collisions.Count > 0 ? collisions.OrderBy(i => i.Distance).ToList()[0].Position : new Vector2();
         }
+
+        public static void Init()
+        {
+            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
+        }
+
+        #endregion
+
+        #region Methods
+
+        private static FastPredResult FastPrediction(Vector2 from, Obj_AI_Base unit, int delay, int speed)
+        {
+            var d = (delay / 1000f + (from.Distance(unit) / speed)) * unit.MoveSpeed;
+            var path = unit.GetWaypoints();
+            return path.PathLength() > d
+                       ? new FastPredResult
+                       {
+                           IsMoving = true,
+                           CurrentPos = unit.ServerPosition.To2D(),
+                           PredictedPos = path.CutPath((int)d)[0]
+                       }
+                       : (path.Count == 0
+                              ? new FastPredResult
+                              {
+                                  IsMoving = false,
+                                  CurrentPos = unit.ServerPosition.To2D(),
+                                  PredictedPos = unit.ServerPosition.To2D()
+                              }
+                              : new FastPredResult
+                              {
+                                  IsMoving = false,
+                                  CurrentPos = path[path.Count - 1],
+                                  PredictedPos = path[path.Count - 1]
+                              });
+        }
+
+        private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (!sender.IsValid || sender.Team != ObjectManager.Player.Team || args.SData.Name != "YasuoWMovingWall")
+            {
+                return;
+            }
+            wallCastT = Utils.GameTimeTickCount;
+            wallCastedPos = sender.ServerPosition.To2D();
+        }
+
+        #endregion
     }
 }

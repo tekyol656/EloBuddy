@@ -38,7 +38,7 @@ namespace AddonTemplate
             Dervish,
             Zhonyas,
             Archangles,
-        Witchcap ;
+            Witchcap;
 
         public static Spell.Active Heal, Barrier, Cleanse;
         public static void LoadSpells()

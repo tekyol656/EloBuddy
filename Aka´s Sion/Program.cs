@@ -34,9 +34,10 @@ namespace AddonTemplate
             Config.Initialize();
             SpellManager.Initialize();
             ModeManager.Initialize();
-
+            
             // Listen to events we need
             Drawing.OnDraw += OnDraw;
+            //Game.OnTick += Activator.GameOnOnUpdate;
 
         }
 

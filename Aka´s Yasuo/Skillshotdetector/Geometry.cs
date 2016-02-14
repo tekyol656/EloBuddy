@@ -16,7 +16,7 @@ using Color = System.Drawing.Color;
 
 namespace AkaYasuo
 {
-    public static class Geometry
+    public static class Geometry2
     {
         private const int CircleLineSegment = 22;
         // ReSharper disable once InconsistentNaming

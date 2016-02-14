@@ -1,49 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu.Values;
-using SharpDX;
 
 namespace AkaYasuo.Modes
 {
     partial class LastHit
     {
-        public static void LastHitmode()
+        public static void Lasthitmode()
         {
-            foreach (Obj_AI_Base minion in EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Variables._Player.ServerPosition, Program.Q.Range, true).OrderByDescending(m => m.Health))
+            if (MenuManager.LastHitMenu["Q"].Cast<CheckBox>().CurrentValue && Program.Q.IsReady() && !Variables._Player.IsDashing()
+    && (!Variables.HaveQ3 || MenuManager.LastHitMenu["Q3"].Cast<CheckBox>().CurrentValue))
             {
-                if (minion == null)
+                var obj =
+                    EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Variables._Player.ServerPosition,
+                        !Variables.HaveQ3 ? Variables.QRange : Variables.Q2Range).OrderByDescending(m => m.Health).FirstOrDefault(i => DamageManager._GetEDmg(i) >= i.Health);
+                if (obj != null)
                 {
-                    return;
+                   (!Variables.HaveQ3 ? Program.Q : Program.Q2).Cast(obj);
                 }
-
-                if (!minion.IsDead && MenuManager.LastHitMenu["Q"].Cast<CheckBox>().CurrentValue && Program.Q.IsReady() && minion.IsValidTarget() && !Variables.Q3READY(Variables._Player))
+            }
+            if (MenuManager.LastHitMenu["E"].Cast<CheckBox>().CurrentValue && Program.E.IsReady())
+            {
+                var obj =
+                    EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Variables._Player.ServerPosition, Program.E.Range).OrderByDescending(m => m.Health)
+                        .Where(
+                            i =>
+                            Variables.CanCastE(i)
+                            && (!Variables._Player.IsInAutoAttackRange(i) || i.Health > Variables._Player.GetAutoAttackDamage(i, true)))
+                        .FirstOrDefault(i => DamageManager._GetEDmg(i) >= i.Health);
+                if (obj != null)
                 {
-                    if (minion.Health <= DamageManager.GetQDmg(minion))
-                    {
-                        Program.Q.Cast(minion.ServerPosition);
-                    }
-                }
-                if (!minion.IsDead && MenuManager.LastHitMenu["Q3"].Cast<CheckBox>().CurrentValue && Program.Q.IsReady() && minion.IsValidTarget() && Variables.Q3READY(Variables._Player))
-                {
-                    if (minion.Health <= DamageManager.GetQDmg(minion))
-                    {
-                        Program.Q.Cast(minion.ServerPosition);
-                    }
-                }
-                if (MenuManager.LastHitMenu["E"].Cast<CheckBox>().CurrentValue && Program.E.IsReady() && minion.IsValidTarget())
-                {
-                    if (!Variables.UnderTower((Vector3) Variables.PosAfterE(minion)))
-                    {
-                        if (minion.Health <= DamageManager.GetEDmg(minion))
-                        {
-                            Program.E.Cast(minion);
-                        }
-                    }
+                    Program.E.Cast(obj);
                 }
             }
         }

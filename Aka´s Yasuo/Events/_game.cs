@@ -3,6 +3,7 @@ using System.Linq;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Events;
 
 namespace AkaYasuo.Events
 {
@@ -10,69 +11,42 @@ namespace AkaYasuo.Events
     {
         public static void AutoQ()
         {
-            if (MenuManager.HarassMenu["AutoQ"].Cast<KeyBind>().CurrentValue &&
-               (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.None)))
+            if (!MenuManager.HarassMenu["AutoQ"].Cast<KeyBind>().CurrentValue || Variables._Player.IsDashing()
+                || (Variables.HaveQ3 && !MenuManager.HarassMenu["AutoQ3"].Cast<CheckBox>().CurrentValue)    
+                || (Variables._Player.IsUnderEnemyturret() && !MenuManager.HarassMenu["QTower"].Cast<CheckBox>().CurrentValue))
             {
-                var TsTarget = TargetSelector.GetTarget(Program.Q.Range, DamageType.Physical);
-
-                if (TsTarget == null)
-                {
-                    return;
-                }
-
-                if (MenuManager.HarassMenu["QunderTower"].Cast<CheckBox>().CurrentValue)
-                {
-                    PredictionResult QPred = Program.Q.GetPrediction(TsTarget);
-
-                    if (Program.Q3.IsReady() && Variables.Q3READY(Variables._Player) &&
-                        MenuManager.HarassMenu["AutoQ3"].Cast<CheckBox>().CurrentValue && !Variables.isDashing)
-                    {
-                        Program.Q.Cast(TsTarget.Position);
-                        Core.DelayAction(Orbwalker.ResetAutoAttack, 250);
-                    }
-                    else if (!Variables.Q3READY(Variables._Player) && Program.Q.IsReady() && !Variables.Q3READY(Variables._Player) &&
-                             MenuManager.HarassMenu["Q"].Cast<CheckBox>().CurrentValue && !Variables.isDashing)
-                    {
-                        Program.Q.Cast(TsTarget.Position);
-                        Core.DelayAction(Orbwalker.ResetAutoAttack, 250);
-                    }
-                }
-                else if (!MenuManager.HarassMenu["QunderTower"].Cast<CheckBox>().CurrentValue)
-                {
-                    if (!Variables.UnderTower(Variables._Player.ServerPosition) && Program.Q3.IsReady() && Variables.Q3READY(Variables._Player) &&
-                        MenuManager.HarassMenu["AutoQ3"].Cast<CheckBox>().CurrentValue && !Variables.isDashing)
-                    {
-                        Program.Q.Cast(TsTarget.Position);
-                        Core.DelayAction(Orbwalker.ResetAutoAttack, 250);
-                    }
-                    if (!Variables.Q3READY(Variables._Player) && Program.Q.IsReady() && !Variables.Q3READY(Variables._Player) &&
-                        MenuManager.HarassMenu["Q"].Cast<CheckBox>().CurrentValue && !Variables.IsDashing &&
-                        !Variables.UnderTower(Variables._Player.ServerPosition))
-                    {
-                        Program.Q.Cast(TsTarget.Position);
-                        Core.DelayAction(Orbwalker.ResetAutoAttack, 250);
-                    }
-                }
+                return;
             }
+            var target = TargetSelector.GetTarget(!Variables.HaveQ3 ? Variables.QRange : Variables.Q2Range, DamageType.Physical);
+            if (target == null)
+            {
+                return;
+            }
+            (!Variables.HaveQ3 ? Program.Q : Program.Q2).Cast(target);
         }
 
-        public static void AutoQMinion()
+        public static void StackQ()
         {
-            if (MenuManager.HarassMenu["AutoQMinion"].Cast<KeyBind>().CurrentValue &&
-               (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.None)))
+            if (!MenuManager.MiscMenu["StackQ"].Cast<CheckBox>().CurrentValue || !Program.Q.IsReady() || Variables._Player.IsDashing() || Variables.HaveQ3)
             {
-                foreach (Obj_AI_Base TsTarget in EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Variables._Player.Position, Program.Q.Range, true).OrderByDescending(m => m.Health))
-                {
+                return;
+            }
 
-                    if (TsTarget == null)
+            var target = TargetSelector.GetTarget(Program.Q.Range, DamageType.Physical);
+            if (target != null && (!Variables._Player.IsUnderEnemyturret() || !target.ServerPosition.IsUnderTurret()))
+            {
+                Program.Q.Cast(target.ServerPosition);
+            }
+            else
+            {
+                var minionObj = EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Variables._Player.ServerPosition, Variables.QRange);
+                if (minionObj.Any())
+                {
+                    var obj = minionObj.FirstOrDefault(i => DamageManager._GetQDmg(i) >= i.Health)
+          ?? minionObj.MinOrDefault(i => i.Distance(Variables._Player));
+                    if (obj != null)
                     {
-                        return;
-                    }
-                    if (!Variables.Q3READY(Variables._Player) && Program.Q.IsReady() && !Variables.Q3READY(Variables._Player) &&
-                             MenuManager.HarassMenu["Q"].Cast<CheckBox>().CurrentValue && !Variables.isDashing)
-                    {
-                        Program.Q.Cast(TsTarget.Position);
-                        Core.DelayAction(Orbwalker.ResetAutoAttack, 250);
+                        Program.Q.Cast(obj);
                     }
                 }
             }
@@ -96,40 +70,6 @@ namespace AkaYasuo.Events
             if (wL < level[1]) Variables._Player.Spellbook.LevelSpell(SpellSlot.W);
             if (eL < level[2]) Variables._Player.Spellbook.LevelSpell(SpellSlot.E);
             if (rL < level[3]) Variables._Player.Spellbook.LevelSpell(SpellSlot.R);
-        }
-
-        public static void Startdash()
-        {
-            if (Variables.startDash + 470000 / ((700 + Variables._Player.MoveSpeed)) < Environment.TickCount && Variables.isDashing)
-            {
-                Variables.IsDashing = false;
-            }
-        }
-
-        public static void Skillshotdetector()
-        {
-            Variables.EvadeDetectedSkillshots.RemoveAll(skillshot => !skillshot.IsActive());
-
-            foreach (var mis in Variables.EvadeDetectedSkillshots)
-            {
-                if (MenuManager.DogeMenu["smartW"].Cast<CheckBox>().CurrentValue && !Functions.Events._game.isSafePoint(Variables._Player.Position.To2D(), true).IsSafe)
-                {
-                    Functions.Events._game.useWSmart(mis);
-                }
-
-                if (MenuManager.DogeMenu["smartEDogue"].Cast<CheckBox>().CurrentValue && !Functions.Events._game.isSafePoint(Variables._Player.Position.To2D(), true).IsSafe)
-                {
-                    Functions.Events._game.useEtoSafe(mis);
-                }
-            }
-        }
-
-        public static void updateSkillshots()
-        {
-            foreach (var ss in Variables.EvadeDetectedSkillshots)
-            {
-                ss.Game_OnGameUpdate();
-            }
         }
     }
 }

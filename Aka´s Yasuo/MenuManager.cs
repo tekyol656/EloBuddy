@@ -60,9 +60,11 @@ namespace AkaYasuo
             ComboMenu.AddGroupLabel("Combo");
             ComboMenu.Add("Q", new CheckBox("Use Q"));
             ComboMenu.Add("EC", new CheckBox("Use E"));
-            ComboMenu.Add("E1", new Slider("when enemy range >=", 375, 475, 1));
-            ComboMenu.Add("E2", new Slider("Use E-GapCloser when enemy range >=", 230, 1300, 1));
-            ComboMenu.Add("E3", new CheckBox("Mode: On = ToTarget / OFF = ToMouse"));
+            ComboMenu.Add("EQ", new CheckBox("Use EQ"));
+            ComboMenu.Add("EGap", new CheckBox("Use E Gapcloser"));
+            ComboMenu.Add("EGaps", new Slider("Use E-GapCloser when enemy not in", 300, 1, 475));
+            ComboMenu.Add("EGapTower", new CheckBox("Gapclose Tower?", false));
+            ComboMenu.Add("StackQ", new CheckBox("Stack Q while Gapcloser"));
             ComboMenu.Add("R", new CheckBox("Use R"));
             ComboMenu.Add("Ignite", new CheckBox("Use Ignite"));
             ComboMenu.AddGroupLabel("R Combo Settings");
@@ -84,19 +86,21 @@ namespace AkaYasuo
         public static void Harassmenu()
         {
             HarassMenu = YMenu.AddSubMenu("Harass", "Harass");
+            HarassMenu.AddGroupLabel("Auto Harass");
             HarassMenu.Add("AutoQ", new KeyBind("Auto Q Toggle", true, KeyBind.BindTypes.PressToggle, 'T'));
-            HarassMenu.Add("AutoQMinion", new KeyBind("Auto Q Minion Toggle", true, KeyBind.BindTypes.PressToggle, 'H'));
-            HarassMenu.Add("AutoQ3", new CheckBox("Use Q3 Auto?"));
+            HarassMenu.Add("AutoQ3", new CheckBox("Auto Q3"));
+            HarassMenu.Add("QTower", new CheckBox("Auto Q UnderTower"));
+            HarassMenu.AddGroupLabel("Harass");
             HarassMenu.Add("Q", new CheckBox("Use Q"));
             HarassMenu.Add("Q3", new CheckBox("Use Q3"));
-            HarassMenu.Add("E", new CheckBox("Use E"));
-            HarassMenu.Add("QunderTower", new CheckBox("Auto Q UnderTower"));
+            HarassMenu.Add("QLastHit", new CheckBox("Q LastHit?"));
         }
 
         public static void Fleemenu()
         {
             FleeMenu = YMenu.AddSubMenu("Flee", "Flee");
-            FleeMenu.Add("EscQ", new CheckBox("Use Q"));
+            FleeMenu.AddGroupLabel("Flee");
+            FleeMenu.Add("EscQ", new CheckBox("Stack Q"));
             FleeMenu.Add("EscE", new CheckBox("Use E"));
             FleeMenu.Add("WJ", new KeyBind("Walljump in Flee mode", false, KeyBind.BindTypes.HoldActive, 'G'));
         }
@@ -104,6 +108,7 @@ namespace AkaYasuo
         public static void LaneClearmenu()
         {
             LaneClearMenu = YMenu.AddSubMenu("LaneClear", "LaneClear");
+            LaneClearMenu.AddGroupLabel("LaneClear");
             LaneClearMenu.Add("Q", new CheckBox("Use Q"));
             LaneClearMenu.Add("Q3", new CheckBox("Use Q3"));
             LaneClearMenu.Add("E", new CheckBox("Use E"));
@@ -113,6 +118,7 @@ namespace AkaYasuo
         public static void JungleClearmenu()
         {
             JungleClearMenu = YMenu.AddSubMenu("JungleClear", "JungleClear");
+            JungleClearMenu.AddGroupLabel("JungleClear");
             JungleClearMenu.Add("Q", new CheckBox("Use Q"));
             JungleClearMenu.Add("E", new CheckBox("Use E"));
             JungleClearMenu.Add("Items", new CheckBox("Use Items"));
@@ -121,6 +127,7 @@ namespace AkaYasuo
         public static void LastHitmenu()
         {
             LastHitMenu = YMenu.AddSubMenu("LastHit", "LastHit");
+            LastHitMenu.AddGroupLabel("LastHit");
             LastHitMenu.Add("Q", new CheckBox("Use Q"));
             LastHitMenu.Add("Q3", new CheckBox("Use Q3"));
             LastHitMenu.Add("E", new CheckBox("Use E"));
@@ -129,6 +136,7 @@ namespace AkaYasuo
         public static void KillStealmenu()
         {
             KillStealMenu = YMenu.AddSubMenu("KillSteal", "KillSteal");
+            KillStealMenu.AddGroupLabel("KillSteal");
             KillStealMenu.Add("KsQ", new CheckBox("Use Q"));
             KillStealMenu.Add("KsE", new CheckBox("Use E"));
             KillStealMenu.Add("KsIgnite", new CheckBox("Use Ignite"));
@@ -137,6 +145,8 @@ namespace AkaYasuo
         public static void Miscmenu()
         {
             MiscMenu = YMenu.AddSubMenu("Misc", "Misc");
+            MiscMenu.AddGroupLabel("Misc");
+            MiscMenu.Add("StackQ", new CheckBox("Stack Q"));
             MiscMenu.Add("InterruptQ", new CheckBox("Use Q3 to Interrupt"));
             MiscMenu.Add("noEturret", new CheckBox("Dont Jump Turret"));
             MiscMenu.AddSeparator();
@@ -166,56 +176,30 @@ namespace AkaYasuo
         public static void Drawingmenu()
         {
             DrawingMenu = YMenu.AddSubMenu("Drawing", "Drawing");
+            DrawingMenu.AddGroupLabel("Drawings");
             DrawingMenu.Add("DrawQ", new CheckBox("Draw Q"));
             DrawingMenu.Add("DrawQ3", new CheckBox("Draw Q3"));
             DrawingMenu.Add("DrawE", new CheckBox("Draw E"));
             DrawingMenu.Add("DrawR", new CheckBox("Draw R"));
-            DrawingMenu.Add("DrawTarget", new CheckBox("Draw Target"));
             DrawingMenu.Add("DrawSpots", new CheckBox("Draw Walljump spots"));
         }
 
         public static void Dogemenu()
         {
-            DogeMenu = YMenu.AddSubMenu("Doge", "Doge");
-            DogeMenu.Add("smartW", new CheckBox("Smart WindWall"));
-            DogeMenu.Add("smartWD",
-                new Slider("Smart WindWall Delay(cast when SPELL is about to hit in x milliseconds)", 3000, 0, 3000));
-            DogeMenu.Add("smartEDogue", new CheckBox("E use Doge"));
-            DogeMenu.Add("wwDanger", new CheckBox("WindWall only dangerous"));
-            var skillShots = MainMenu.AddMenu("Enemy Skillshots", "aShotsSkills");
-
-            foreach (var hero in ObjectManager.Get<AIHeroClient>())
+            if (EntityManager.Heroes.Enemies.Any())
             {
-                if (hero.Team != ObjectManager.Player.Team)
-                {
-                    foreach (var spell in SpellDatabase.Spells)
-                    {
-                        if (spell.ChampionName == hero.ChampionName)
-                        {
-                            SubMenu["SMIN"] = skillShots.AddSubMenu(spell.MenuItemName, spell.MenuItemName);
-
-                            SubMenu["SMIN"].Add
-                                ("DangerLevel" + spell.MenuItemName,
-                                    new Slider("Danger level", spell.DangerValue, 5, 1));
-
-                            SubMenu["SMIN"].Add
-                                ("IsDangerous" + spell.MenuItemName,
-                                    new CheckBox("Is Dangerous", spell.IsDangerous));
-
-                            //SubMenu["SMIN"].Add("Draw" + spell.MenuItemName, new CheckBox("Draw"));
-                            SubMenu["SMIN"].Add("Enabled" + spell.MenuItemName, new CheckBox("Enabled"));
-                        }
-                    }
-                }
+                EvadeManager.EvadeSkillshot.Init();
+                EvadeManager.EvadeTarget.Init();
             }
         }
 
         public static void Itemmenu()
         {
             ItemMenu = YMenu.AddSubMenu("Items", "QSS");
+            ItemMenu.AddGroupLabel("Aggressive Items");
             ItemMenu.Add("Items", new CheckBox("Use Items"));
             ItemMenu.Add("myhp", new Slider("Use BOTRK if my HP is <=", 70, 0, 101));
-            ItemMenu.AddSeparator();
+            ItemMenu.AddGroupLabel("Qss");
             ItemMenu.Add("use", new KeyBind("Use QSS/Mercurial", true, KeyBind.BindTypes.PressToggle, 'K'));
             ItemMenu.Add("delay", new Slider("Activation Delay", 1000, 0, 2000));
             ItemMenu.Add("Blind",

@@ -6,48 +6,35 @@ using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Events;
 
 namespace AkaYasuo.Modes
 {
     partial class Flee
     {
-        public static void Fleemode()
+        public static void Flee2()
         {
-            foreach (Obj_AI_Base minion in EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy, Variables._Player.ServerPosition, Program.E.Range, true))
+            if (MenuManager.FleeMenu["EscQ"].Cast<CheckBox>().CurrentValue && Program.Q.IsReady() && !Variables.HaveQ3 && Variables._Player.IsDashing())
             {
-                var bestMinion =
-                   ObjectManager.Get<Obj_AI_Base>()
-                       .Where(x => x.IsValidTarget(Program.E.Range))
-                       .Where(x => x.Distance(Game.CursorPos) < Variables._Player.Distance(Game.CursorPos))
-                       .OrderByDescending(x => x.Distance(Variables._Player))
-                       .FirstOrDefault();
-
-                if (bestMinion != null && Variables._Player.IsFacing(bestMinion) && Variables.CanCastE(bestMinion) && (Program.E.IsReady() && MenuManager.FleeMenu["EscE"].Cast<CheckBox>().CurrentValue))
+                if (Variables.QCirTarget != null)
                 {
-                    Program.E.Cast(bestMinion);
+                    Variables.CastQCir(Variables.QCirTarget);
                 }
-                if (Program.Q.IsReady() && MenuManager.FleeMenu["EscQ"].Cast<CheckBox>().CurrentValue)
+                var minionObj = EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy,
+                    Variables._Player.GetDashInfo().EndPos,
+                    Variables.QCirWidth);
+                if (minionObj.Any() && Variables._Player.Distance(Variables._Player.GetDashInfo().EndPos) < 150
+                    )
                 {
-                    if (!Variables.Q3READY(Variables._Player) && Program.Q.Range == 475)
-                    {
-                        Program.Q.Cast(minion);
-                    }
+                    Variables.CastQCir(minionObj.MinOrDefault(i => i.Distance(Variables._Player)));
                 }
             }
-            foreach (AIHeroClient enemy in EntityManager.Heroes.Enemies)
+            var obj = Variables.GetNearObj();
+            if (obj == null || !Program.E.IsReady())
             {
-                var bestMinion =
-                   ObjectManager.Get<AIHeroClient>()
-                       .Where(x => x.IsValidTarget(Program.E.Range))
-                       .Where(x => x.Distance(Game.CursorPos) < Variables._Player.Distance(Game.CursorPos))
-                       .OrderByDescending(x => x.Distance(Variables._Player))
-                       .FirstOrDefault();
-
-                if (bestMinion != null && Variables._Player.IsFacing(bestMinion) && (Program.E.IsReady() && MenuManager.FleeMenu["EscE"].Cast<CheckBox>().CurrentValue) && Variables._Player.IsFacing(bestMinion))
-                {
-                    Program.E.Cast(bestMinion);
-                }
+                return;
             }
+            Program.E.Cast(obj);
         }
     }
 }

@@ -14,136 +14,109 @@ using SharpDX;
 
 namespace AkaYasuo
 {
-    public enum SpellValidTargets
+    public enum CastTypes
+    {
+        Position,
+
+        Target,
+
+        Self
+    }
+
+    public enum SpellTargets
     {
         AllyMinions,
+
         EnemyMinions,
 
         AllyWards,
+
         EnemyWards,
 
         AllyChampions,
+
         EnemyChampions
     }
 
-    /// <summary>
-    ///     Class containing the needed info about the evading spells.
-    /// </summary>
-    public class EvadeSpellData
+    public enum EvadeTypes
     {
-        public delegate float MoveSpeedAmount();
+        Blink,
 
-        public bool CanShieldAllies;
+        Dash,
+
+        Invulnerability,
+
+        MovementSpeedBuff,
+
+        Shield,
+
+        SpellShield,
+
+        WindWall
+    }
+
+    internal class EvadeSpellData
+    {
+        #region Fields
+
+        public CastTypes CastType;
+
         public string CheckSpellName = "";
-        public int DangerLevel;
+
         public int Delay;
+
+        public EvadeTypes EvadeType;
+
         public bool FixedRange;
-        public bool Invert;
-        public bool IsBlink;
-        public bool IsDash;
-        public bool IsInvulnerability;
-        public bool IsMovementSpeedBuff;
-        public bool IsShield;
-        public bool IsSpellShield;
-        public bool IsSummonerSpell;
+
         public float MaxRange;
-        public MoveSpeedAmount MoveSpeedTotalAmount;
+
         public string Name;
-        public bool RequiresPreMove;
-        public bool SelfCast;
+
         public SpellSlot Slot;
+
         public int Speed;
-        public SpellValidTargets[] ValidTargets;
-        public EvadeSpellData() {}
 
-        public EvadeSpellData(string name, int dangerLevel)
+        public SpellTargets[] ValidTargets;
+
+        private int dangerLevel;
+
+        #endregion
+
+        #region Public Properties
+
+        public int DangerLevel
         {
-            Name = name;
-            DangerLevel = dangerLevel;
+            get
+            {
+                return EvadeManager.EvadeSkillshot.evadeSpells["DangerLevel"] != null // MenuManager.LaneClearMenu["E"].Cast<CheckBox>() != null
+                           ? EvadeManager.EvadeSkillshot.evadeSpells["DangerLevel"].Cast<Slider>().CurrentValue
+                           : this.dangerLevel;
+            }
+            set
+            {
+                this.dangerLevel = value;
+            }
         }
 
-        public bool IsTargetted
+        public bool Enabled
         {
-            get { return ValidTargets != null; }
+            get
+            {
+                return EvadeManager.EvadeSkillshot.evadeSpells["Enabled"].Cast<CheckBox>().CurrentValue;
+            }
         }
 
-        public bool IsReady()
+        public bool IsReady
         {
-            return ((CheckSpellName == "" || ObjectManager.Player.Spellbook.GetSpell(Slot).Name == CheckSpellName) &&
-                    ((IsSummonerSpell && ObjectManager.Player.Spellbook.CanUseSpell(Slot) == SpellState.Ready) ||
-                     (!IsSummonerSpell && ObjectManager.Player.Spellbook.CanUseSpell(Slot) == SpellState.Ready)));
+            get
+            {
+                return (this.CheckSpellName == ""
+                        || ObjectManager.Player.Spellbook.GetSpell(this.Slot).Name == this.CheckSpellName)
+                       && ObjectManager.Player.Spellbook.CanUseSpell(Slot) == SpellState.Ready;
+            }
         }
-    }
 
-    internal class DashData : EvadeSpellData
-    {
-        public DashData(string name, SpellSlot slot, float range, bool fixedRange, int delay, int speed, int dangerLevel)
-        {
-            Name = name;
-            MaxRange = range;
-            Slot = slot;
-            FixedRange = fixedRange;
-            Delay = delay;
-            Speed = speed;
-            DangerLevel = dangerLevel;
-            IsDash = true;
-        }
-    }
-
-    internal class BlinkData : EvadeSpellData
-    {
-        public BlinkData(string name,
-            SpellSlot slot,
-            float range,
-            int delay,
-            int dangerLevel,
-            bool isSummonerSpell = false)
-        {
-            Name = name;
-            MaxRange = range;
-            Slot = slot;
-            Delay = delay;
-            DangerLevel = dangerLevel;
-            IsSummonerSpell = isSummonerSpell;
-            IsBlink = true;
-        }
-    }
-
-    internal class InvulnerabilityData : EvadeSpellData
-    {
-        public InvulnerabilityData(string name, SpellSlot slot, int delay, int dangerLevel)
-        {
-            Name = name;
-            Slot = slot;
-            Delay = delay;
-            DangerLevel = dangerLevel;
-            IsInvulnerability = true;
-        }
-    }
-
-    internal class ShieldData : EvadeSpellData
-    {
-        public ShieldData(string name, SpellSlot slot, int delay, int dangerLevel, bool isSpellShield = false)
-        {
-            Name = name;
-            Slot = slot;
-            Delay = delay;
-            DangerLevel = dangerLevel;
-            IsSpellShield = isSpellShield;
-            IsShield = !IsSpellShield;
-        }
-    }
-
-    internal class MoveBuffData : EvadeSpellData
-    {
-        public MoveBuffData(string name, SpellSlot slot, int delay, int dangerLevel, MoveSpeedAmount amount)
-        {
-            Name = name;
-            Slot = slot;
-            Delay = delay;
-            DangerLevel = dangerLevel;
-            MoveSpeedTotalAmount = amount;
-            IsMovementSpeedBuff = true;
-        }
+        #endregion
     }
 }

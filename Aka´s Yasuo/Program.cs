@@ -17,12 +17,12 @@ namespace AkaYasuo
     internal class Program
     {
 
-        public static Spell.Skillshot Q, Q3;
+        public static Spell.Skillshot Q, Q2, E2;
         public static Spell.Targeted E;
         public static Spell.Skillshot W;
         public static Spell.Active R;
         public static Spell.Targeted Ignite;
-        public static Item Qss, Mercurial;
+        public static Item Qss, Mercurial, Trinity, Sheen;
 
         public static void Main(string[] args)
         {
@@ -36,17 +36,18 @@ namespace AkaYasuo
                 return;
             }
 
-            Q = new Spell.Skillshot(SpellSlot.Q, 450, EloBuddy.SDK.Enumerations.SkillShotType.Linear, 250, Variables.GetNewQSpeed(), 1)
+            Q = new Spell.Skillshot(SpellSlot.Q, 500, EloBuddy.SDK.Enumerations.SkillShotType.Linear)
             {
                 AllowedCollisionCount = int.MaxValue
             };
-            Q3 = new Spell.Skillshot(SpellSlot.Q, 900, EloBuddy.SDK.Enumerations.SkillShotType.Linear, 300, 1200, 50)
+            Q2 = new Spell.Skillshot(SpellSlot.Q, 1100, EloBuddy.SDK.Enumerations.SkillShotType.Linear)
             {
                 AllowedCollisionCount = int.MaxValue
             };
             W = new Spell.Skillshot(SpellSlot.W, 400, EloBuddy.SDK.Enumerations.SkillShotType.Cone);
             E = new Spell.Targeted(SpellSlot.E, 475);
-            R = new Spell.Active(SpellSlot.R, 1200);
+            E2 = new Spell.Skillshot(SpellSlot.E, 475, EloBuddy.SDK.Enumerations.SkillShotType.Linear);
+            R = new Spell.Active(SpellSlot.R, 1300);
 
             var slot = Variables._Player.GetSpellSlotFromName("summonerdot");
             if (slot != SpellSlot.Unknown)
@@ -56,8 +57,10 @@ namespace AkaYasuo
 
             Qss = new Item((int) ItemId.Quicksilver_Sash);
             Mercurial = new Item((int) ItemId.Mercurial_Scimitar);
+            Trinity = new Item((int)ItemId.Trinity_Force);
+            Sheen = new Item((int)ItemId.Sheen);
 
-                Variables.abilitySequence = new int[] {1, 3, 2, 1, 1, 4, 1, 3, 1, 3, 4, 3, 3, 2, 2, 4, 2, 2};
+            Variables.abilitySequence = new int[] {1, 3, 2, 1, 1, 4, 1, 3, 1, 3, 4, 3, 3, 2, 2, 4, 2, 2};
 
             EventManager.load();
             MenuManager.Load();

@@ -1,0 +1,11 @@
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\GosuMechanics_Yasuo.exe.config
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\GosuMechanics_Yasuo.exe
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\GosuMechanics_Yasuo.pdb
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\EloBuddy.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\EloBuddy.SDK.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\SharpDX.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\bin\Release\Newtonsoft.Json.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\obj\Release\GosuMechanics_Yasuo.exe
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\obj\Release\GosuMechanics_Yasuo.pdb
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Yasuo\obj\Release\Aka´s Yasuo.csprojResolveAssemblyReference.cache

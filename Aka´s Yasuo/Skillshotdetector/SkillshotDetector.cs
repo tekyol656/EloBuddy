@@ -11,266 +11,225 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
+using System.Text.RegularExpressions;
 
 namespace AkaYasuo
 {
     public static class SkillshotDetector
     {
-        public delegate void OnDeleteMissileH(Skillshot skillshot, MissileClient missile);
+            #region Static Fields
 
-        public delegate void OnDetectSkillshotH(Skillshot skillshot);
+            public static List<Skillshot> DetectedSkillshots = new List<Skillshot>();
 
-        static SkillshotDetector()
-        {
-            //Detect when the skillshots are created.
-            Obj_AI_Base.OnProcessSpellCast += ObjAiHeroOnOnProcessSpellCast;
+            #endregion
 
-            //Detect when projectiles collide.
-            GameObject.OnDelete += ObjSpellMissileOnOnDelete;
-            GameObject.OnCreate += ObjSpellMissileOnOnCreate;
-            GameObject.OnDelete += GameObject_OnDelete;
-        }
+            #region Constructors and Destructors
 
-        private static void GameObject_OnDelete(GameObject sender, EventArgs args)
-        {
-            if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
+            static SkillshotDetector()
             {
-                return;
+                GameObject.OnDelete += ObjOnDelete;
+                GameObject.OnCreate += ObjMissileClientOnCreate;
+                GameObject.OnDelete += ObjMissileClientOnDelete;
+                Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             }
 
-            for (var i = Variables.DetectedSkillShots.Count - 1; i >= 0; i--)
+            #endregion
+
+            #region Delegates
+
+            public delegate void OnDeleteMissileH(Skillshot skillshot, MissileClient missile);
+
+            public delegate void OnDetectSkillshotH(Skillshot skillshot);
+
+            #endregion
+
+            #region Public Events
+
+            public static event OnDeleteMissileH OnDeleteMissile;
+
+            public static event OnDetectSkillshotH OnDetectSkillshot;
+
+            #endregion
+
+            #region Methods
+
+            private static void ObjMissileClientOnCreate(GameObject sender, EventArgs args)
             {
-                var skillshot = Variables.DetectedSkillShots[i];
-                if (skillshot.SpellData.ToggleParticleName != "" &&
-                    sender.Name.Contains(skillshot.SpellData.ToggleParticleName))
+                if (!sender.IsValid<MissileClient>())
                 {
-                    Variables.DetectedSkillShots.RemoveAt(i);
+                    return;
                 }
-            }
-        }
-
-        private static void ObjSpellMissileOnOnCreate(GameObject sender, EventArgs args)
-        {
-            if (!sender.IsValid || !(sender is MissileClient))
-            {
-                return; //not sure if needed
-            }
-
-            var missile = (MissileClient) sender;
-
-            var unit = missile.SpellCaster;
-            if (!unit.IsValid || (unit.Team == ObjectManager.Player.Team))
-            {
-                return;
-            }
-
-            var spellData = SpellDatabase.GetByMissileName(missile.SData.Name);
-            if (spellData == null)
-            {
-                return;
-            }
-            var missilePosition = missile.Position.To2D();
-            var unitPosition = missile.StartPosition.To2D();
-            var endPos = missile.EndPosition.To2D();
-
-            //Calculate the real end Point:
-            var direction = (endPos - unitPosition).Normalized();
-            if (unitPosition.Distance(endPos) > spellData.Range || spellData.FixedRange)
-            {
-                endPos = unitPosition + direction * spellData.Range;
-            }
-
-            if (spellData.ExtraRange != -1)
-            {
-                endPos = endPos +
-                         Math.Min(spellData.ExtraRange, spellData.Range - endPos.Distance(unitPosition)) * direction;
-            }
-
-            var castTime = Environment.TickCount - Game.Ping / 2 - (spellData.MissileDelayed ? 0 : spellData.Delay) -
-                           (int) (1000 * missilePosition.Distance(unitPosition) / spellData.MissileSpeed);
-
-            //Trigger the skillshot detection callbacks.
-            TriggerOnDetectSkillshot(DetectionType.RecvPacket, spellData, castTime, unitPosition, endPos, unit);
-        }
-
-        /// <summary>
-        ///     Delete the missiles that collide.
-        /// </summary>
-        private static void ObjSpellMissileOnOnDelete(GameObject sender, EventArgs args)
-        {
-            if (!(sender is MissileClient))
-            {
-                return;
-            }
-
-            var missile = (MissileClient) sender;
-
-            if (!(missile.SpellCaster is AIHeroClient))
-            {
-                return;
-            }
-
-            var unit = (AIHeroClient) missile.SpellCaster;
-            if (!unit.IsValid || (unit.Team == ObjectManager.Player.Team))
-            {
-                return;
-            }
-
-            var spellName = missile.SData.Name;
-
-            if (OnDeleteMissile != null)
-            {
-                foreach (var skillshot in Variables.DetectedSkillShots)
+                var missile = (MissileClient)sender;
+                if (!missile.SpellCaster.IsValid<AIHeroClient>() || missile.SpellCaster.Team == ObjectManager.Player.Team)
                 {
-                    if (skillshot.SpellData.MissileSpellName == spellName &&
-                        (skillshot.Unit.NetworkId == unit.NetworkId &&
-                         (missile.EndPosition.To2D() - missile.StartPosition.To2D()).AngleBetween(skillshot.Direction) <
-                         10) && skillshot.SpellData.CanBeRemoved)
+                    return;
+                }
+                var spellData = SpellDatabase.GetByMissileName(missile.SData.Name);
+                if (spellData == null)
+                {
+                    return;
+                }
+            ObjMissileClientOnCreateDelayed(missile, spellData);
+            }
+
+            private static void ObjMissileClientOnCreateDelayed(MissileClient missile, SpellData spellData)
+            {
+                var unit = missile.SpellCaster as AIHeroClient;
+                var missilePosition = missile.Position.To2D();
+                var unitPosition = missile.StartPosition.To2D();
+                var endPos = missile.EndPosition.To2D();
+                var direction = (endPos - unitPosition).Normalized();
+                if (unitPosition.Distance(endPos) > spellData.Range || spellData.FixedRange)
+                {
+                    endPos = unitPosition + direction * spellData.Range;
+                }
+                if (spellData.ExtraRange != -1)
+                {
+                    endPos += Math.Min(spellData.ExtraRange, spellData.Range - endPos.Distance(unitPosition)) * direction;
+                }
+                var castTime = Utils.GameTimeTickCount - Game.Ping / 2 - (spellData.MissileDelayed ? 0 : spellData.Delay)
+                               - (int)(1000 * missilePosition.Distance(unitPosition) / spellData.MissileSpeed);
+                TriggerOnDetectSkillshot(DetectionType.RecvPacket, spellData, castTime, unitPosition, endPos, unit);
+            }
+
+            private static void ObjMissileClientOnDelete(GameObject sender, EventArgs args)
+            {
+                if (!sender.IsValid<MissileClient>())
+                {
+                    return;
+                }
+                var missile = (MissileClient)sender;
+                if (!missile.SpellCaster.IsValid<AIHeroClient>() || missile.SpellCaster.Team == ObjectManager.Player.Team)
+                {
+                    return;
+                }
+                var unit = (AIHeroClient)missile.SpellCaster;
+                var spellName = missile.SData.Name;
+                if (OnDeleteMissile != null)
+                {
+                    foreach (var skillshot in
+                        DetectedSkillshots.Where(
+                            i =>
+                            i.SpellData.MissileSpellName == spellName && i.Unit.NetworkId == unit.NetworkId
+                            && (missile.EndPosition.To2D() - missile.StartPosition.To2D()).AngleBetween(i.Direction) < 10
+                            && i.SpellData.CanBeRemoved))
                     {
                         OnDeleteMissile(skillshot, missile);
                         break;
                     }
                 }
+                DetectedSkillshots.RemoveAll(
+                    i =>
+                    (i.SpellData.MissileSpellName == spellName || i.SpellData.ExtraMissileNames.Contains(spellName))
+                    && i.Unit.NetworkId == unit.NetworkId
+                    && (missile.EndPosition - missile.StartPosition).To2D().AngleBetween(i.Direction) < 10
+                    && (i.SpellData.CanBeRemoved || i.SpellData.ForceRemove));
             }
 
-            Variables.DetectedSkillShots.RemoveAll(
-                skillshot =>
-                    (skillshot.SpellData.MissileSpellName == spellName ||
-                     skillshot.SpellData.ExtraMissileNames.Contains(spellName)) &&
-                    (skillshot.Unit.NetworkId == unit.NetworkId &&
-                     ((missile.EndPosition.To2D() - missile.StartPosition.To2D()).AngleBetween(skillshot.Direction) < 10) &&
-                     skillshot.SpellData.CanBeRemoved || skillshot.SpellData.ForceRemove)); // 
-        }
-
-        /// <summary>
-        ///     This event is fired after a skillshot is detected.
-        /// </summary>
-        public static event OnDetectSkillshotH OnDetectSkillshot;
-
-        /// <summary>
-        ///     This event is fired after a skillshot missile collides.
-        /// </summary>
-        public static event OnDeleteMissileH OnDeleteMissile;
-
-        private static void TriggerOnDetectSkillshot(DetectionType detectionType,
-            SpellData spellData,
-            int startT,
-            Vector2 start,
-            Vector2 end,
-            Obj_AI_Base unit,
-            Obj_AI_Base target = null)
-        {
-            var skillshot = new Skillshot(detectionType, spellData, startT, start, end, unit, target);
-
-            if (OnDetectSkillshot != null)
+            private static void ObjOnDelete(GameObject sender, EventArgs args)
             {
-                OnDetectSkillshot(skillshot);
-            }
-        }
-
-        /// <summary>
-        ///     Gets triggered when a unit casts a spell and the unit is visible.
-        /// </summary>
-        private static void ObjAiHeroOnOnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (args.SData.Name == "dravenrdoublecast")
-            {
-                Variables.DetectedSkillShots.RemoveAll(
-                    s => s.Unit.NetworkId == sender.NetworkId && s.SpellData.SpellName == "DravenRCast");
-            }
-
-            if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
-            {
-                return;
-            }
-            //Get the skillshot data.
-            var spellData = SpellDatabase.GetByName(args.SData.Name);
-
-            //Skillshot not added in the database.
-            if (spellData == null)
-            {
-                return;
-            }
-
-            var startPos = new Vector2();
-
-            if (spellData.FromObject != "")
-            {
-                foreach (var o in ObjectManager.Get<GameObject>())
+                if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
                 {
-                    if (o.Name.Contains(spellData.FromObject))
+                    return;
+                }
+                for (var i = DetectedSkillshots.Count - 1; i >= 0; i--)
+                {
+                    var skillshot = DetectedSkillshots[i];
+                    if (skillshot.SpellData.ToggleParticleName != ""
+                        && new Regex(skillshot.SpellData.ToggleParticleName).IsMatch(sender.Name))
                     {
-                        startPos = o.Position.To2D();
+                        DetectedSkillshots.RemoveAt(i);
                     }
                 }
             }
-            else
-            {
-                startPos = sender.ServerPosition.To2D();
-            }
 
-            //For now only zed support.
-            if (spellData.FromObjects != null && spellData.FromObjects.Length > 0)
+            private static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
             {
-                foreach (var obj in ObjectManager.Get<GameObject>())
+                if (!sender.IsValid<AIHeroClient>() || sender.Team == ObjectManager.Player.Team)
                 {
-                    if (obj.IsEnemy && spellData.FromObjects.Contains(obj.Name))
+                    return;
+                }
+                if (args.SData.Name == "dravenrdoublecast")
+                {
+                    DetectedSkillshots.RemoveAll(
+                        i => i.Unit.NetworkId == sender.NetworkId && i.SpellData.SpellName == "DravenRCast");
+                }
+                var spellData = SpellDatabase.GetByName(args.SData.Name);
+                if (spellData == null)
+                {
+                    return;
+                }
+                var startPos = new Vector2();
+                if (spellData.FromObject != "")
+                {
+                    foreach (var obj in ObjectManager.Get<GameObject>().Where(i => i.Name.Contains(spellData.FromObject)))
+                    {
+                        startPos = obj.Position.To2D();
+                    }
+                }
+                else
+                {
+                    startPos = sender.ServerPosition.To2D();
+                }
+                if (spellData.FromObjects != null && spellData.FromObjects.Length > 0)
+                {
+                    foreach (var obj in
+                        ObjectManager.Get<GameObject>().Where(i => i.IsEnemy && spellData.FromObject.Contains(i.Name)))
                     {
                         var start = obj.Position.To2D();
                         var end = start + spellData.Range * (args.End.To2D() - obj.Position.To2D()).Normalized();
                         TriggerOnDetectSkillshot(
-                            DetectionType.ProcessSpell, spellData, Environment.TickCount - Game.Ping / 2, start, end,
+                            DetectionType.ProcessSpell,
+                            spellData,
+                            Utils.GameTimeTickCount - Game.Ping / 2,
+                            start,
+                            end,
                             sender);
                     }
                 }
-            }
-
-            if (!startPos.IsValid())
-            {
-                return;
-            }
-
-            var endPos = args.End.To2D();
-
-            if (spellData.SpellName == "LucianQ" && args.Target != null &&
-                args.Target.NetworkId == ObjectManager.Player.NetworkId)
-            {
-                return;
-            }
-
-            //Calculate the real end Point:
-            var direction = (endPos - startPos).Normalized();
-            if (startPos.Distance(endPos) > spellData.Range || spellData.FixedRange)
-            {
-                endPos = startPos + direction * spellData.Range;
-            }
-
-            if (spellData.ExtraRange != -1)
-            {
-                endPos = endPos +
-                         Math.Min(spellData.ExtraRange, spellData.Range - endPos.Distance(startPos)) * direction;
-            }
-
-
-            //Trigger the skillshot detection callbacks.
-            if (spellData.Targeted)
-            {
-                var target = args.Target as Obj_AI_Base;
-                if (target != null)
-                    TriggerOnDetectSkillshot(
-                        DetectionType.ProcessSpell, spellData, Environment.TickCount - Game.Ping / 2, startPos, endPos,
-                        sender, target);
-            }
-            else
-            {
+                if (!startPos.IsValid())
+                {
+                    return;
+                }
+                var endPos = args.End.To2D();
+                if (spellData.SpellName == "LucianQ" && args.Target != null
+                    && args.Target.NetworkId == ObjectManager.Player.NetworkId)
+                {
+                    return;
+                }
+                var direction = (endPos - startPos).Normalized();
+                if (startPos.Distance(endPos) > spellData.Range || spellData.FixedRange)
+                {
+                    endPos = startPos + direction * spellData.Range;
+                }
+                if (spellData.ExtraRange != -1)
+                {
+                    endPos = endPos
+                             + Math.Min(spellData.ExtraRange, spellData.Range - endPos.Distance(startPos)) * direction;
+                }
                 TriggerOnDetectSkillshot(
-                    DetectionType.ProcessSpell, spellData, Environment.TickCount - Game.Ping / 2, startPos, endPos,
+                    DetectionType.ProcessSpell,
+                    spellData,
+                    Utils.GameTimeTickCount - Game.Ping / 2,
+                    startPos,
+                    endPos,
                     sender);
             }
-        }
 
-        /// <summary>
-        ///     Detects the spells that have missile and are casted from fow.
-        /// </summary>
+            private static void TriggerOnDetectSkillshot(
+                DetectionType detectionType,
+                SpellData spellData,
+                int startT,
+                Vector2 start,
+                Vector2 end,
+                Obj_AI_Base unit)
+            {
+                if (OnDetectSkillshot != null)
+                {
+                    OnDetectSkillshot(new Skillshot(detectionType, spellData, startT, start, end, unit));
+                }
+            }
+
+            #endregion
+        }
     }
-}

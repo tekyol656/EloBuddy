@@ -116,13 +116,13 @@ namespace AddonTemplate
 
             Sums = AMenu.AddSubMenu("Summoners", "sums");
             Sums.AddLabel("Heal");
-            Sums.Add("healManager", new CheckBox("Use Gunblade"));
+            Sums.Add("healManager", new CheckBox("Use Heal"));
             Sums.Add("healManagerMinMeHP", new Slider("Self HP %", 30));
             Sums.Add("healManagerMinEnemyHP", new Slider("Enemy HP HP %", 30));
             Sums.AddLabel("Ignite");
-            Sums.Add("igniteManager", new CheckBox("Use GhostBlade"));
+            Sums.Add("igniteManager", new CheckBox("Use Ignite"));
             Sums.AddLabel("Barrier");
-            Sums.Add("barrierManager", new CheckBox("Use GhostBlade"));
+            Sums.Add("barrierManager", new CheckBox("Use Barrier"));
             Sums.Add("barrierManagerMinMeHP", new Slider("Self HP %", 30));
             Sums.Add("barrierManagerMinEnemyHP", new Slider("Enemy HP HP %", 30));
 
@@ -153,22 +153,13 @@ namespace AddonTemplate
         }
 
 
-        private static void GameOnOnUpdate(EventArgs args)
+        public static void GameOnOnUpdate(EventArgs args)
         {
             AkaActivator.LoadSpells();
             AutoPotions();
             Sams();
-            SmiteEvent();
-            foreach (
-                var ally in EntityManager.Heroes.Allies.Where(a => !a.IsDead))
-            {
-                if (
-                    ally.HealthPercent <= 15 && ally.CountEnemiesInRange(850) >= 2
-                    )
-                {
-                    yelpallys(ally);
-                }
-            }
+            //SmiteEvent();
+
 
             if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
             {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AkaYasuo.Modes
 {
-    partial class LaneClear
+    partial class Clear
     {
     }
 }

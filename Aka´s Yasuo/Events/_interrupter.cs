@@ -12,9 +12,9 @@ namespace AkaYasuo.Events
         public static void Interrupt(Obj_AI_Base sender,
             Interrupter.InterruptableSpellEventArgs e)
         {
-            if (e != null && Program.Q3.IsReady() && Variables.Q3READY(Variables._Player) && sender.IsValidTarget(Program.Q3.Range) && MenuManager.MiscMenu["InterruptQ"].Cast<CheckBox>().CurrentValue)
+            if (e != null && Program.Q2.IsReady() && Variables.HaveQ3 && sender.IsValidTarget(Program.Q2.Range) && MenuManager.MiscMenu["InterruptQ"].Cast<CheckBox>().CurrentValue)
             {
-                Program.Q3.Cast(sender);
+                Program.Q2.Cast(sender.ServerPosition);
             }
         }
     }

@@ -24,11 +24,9 @@ namespace AddonTemplate.Modes
                 var etarget = TargetSelector.GetTarget(R.Range, DamageType.Physical);
                 if (Damages.RDamage(etarget) + Damages.QDamage(etarget) + Damages.EDamage(etarget) + Damages.WDamage(etarget) > etarget.Health)
                 {
-                        R.Cast();
-                    }
+                    R.Cast();
                 }
-            
-
+            }
 
             if (Settings.UseE)
             {
@@ -74,7 +72,6 @@ namespace AddonTemplate.Modes
             }
 
         }
-
 
         private static bool activatedP
         {
