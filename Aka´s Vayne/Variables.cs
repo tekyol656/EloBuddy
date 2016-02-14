@@ -26,7 +26,7 @@ namespace Aka_s_Vayne_reworked
 
         public static AIHeroClient _Player
         {
-            get { return Variables._Player; }
+            get { return ObjectManager.Player; }
         }
 
         public static string[] DangerSliderValues = { "Low", "Medium", "High" };
