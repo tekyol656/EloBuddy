@@ -33,12 +33,12 @@ namespace Aka_s_Vayne_reworked.Evade
                 }
             }
             //Check if the skillshot is from an ally.
-            if (skillshot.Caster.Team == ObjectManager.Player.Team)
+            if (skillshot.Caster.Team == Variables._Player.Team)
             {
                 return;
             }
             //Check if the skillshot is too far away.
-            if (skillshot.Start.Distance(ObjectManager.Player.ServerPosition.To2D()) >
+            if (skillshot.Start.Distance(Variables._Player.ServerPosition.To2D()) >
                 (skillshot.SpellData.Range + skillshot.SpellData.Radius + 1000)*1.5)
             {
                 return;
@@ -102,7 +102,7 @@ namespace Aka_s_Vayne_reworked.Evade
                         {
                             var v = minion.ServerPosition.To2D() - skillshot.Caster.ServerPosition.To2D();
                             if (minion.Name == "Seed" && edge1.CrossProduct(v) > 0 && v.CrossProduct(edge2) > 0 &&
-                                minion.Distance(skillshot.Caster) < 800 && (minion.Team != ObjectManager.Player.Team))
+                                minion.Distance(skillshot.Caster) < 800 && (minion.Team != Variables._Player.Team))
                             {
                                 var start = minion.ServerPosition.To2D();
                                 var end = skillshot.Caster.ServerPosition.To2D()

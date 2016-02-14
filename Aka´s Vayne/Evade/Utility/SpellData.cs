@@ -99,7 +99,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
             {
                 return (!AddHitbox)
                     ? _radius
-                    : _radius + (int)ObjectManager.Player.BoundingRadius;
+                    : _radius + (int)Variables._Player.BoundingRadius;
             }
             set { _radius = value; }
         }

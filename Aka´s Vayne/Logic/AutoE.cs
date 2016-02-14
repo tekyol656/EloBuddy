@@ -14,7 +14,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 return;
             }
 
-            var CondemnTarget = NewELogic.GetCondemnTarget(ObjectManager.Player.ServerPosition);
+            var CondemnTarget = NewELogic.GetCondemnTarget(Variables._Player.ServerPosition);
             if (CondemnTarget.IsValidTarget())
             {
                 Program.E.Cast(CondemnTarget);

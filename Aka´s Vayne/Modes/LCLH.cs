@@ -26,11 +26,11 @@ namespace Aka_s_Vayne_reworked.Modes
 
             var minionsInRange =
                 EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy,
-                    ObjectManager.Player.ServerPosition, ObjectManager.Player.AttackRange + 65)
+                    Variables._Player.ServerPosition, Variables._Player.AttackRange + 65)
                     .Where(
                         m =>
                             m.Health <=
-                            ObjectManager.Player.GetAutoAttackDamage(m) +
+                            Variables._Player.GetAutoAttackDamage(m) +
                             Variables._Player.GetSpellDamage(m, SpellSlot.Q))
                     .ToList();
 

@@ -147,7 +147,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                             from minion in
                                 EntityManager.MinionsAndMonsters.GetLaneMinions(EntityManager.UnitTeam.Enemy,
                                     @from.To3D(), 1200,
-                                    skillshot.Caster.Team == ObjectManager.Player.Team)
+                                    skillshot.Caster.Team == Variables._Player.Team)
                             let pred =
                                 FastPrediction(
                                     @from, minion,
@@ -178,8 +178,8 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                                 ObjectManager.Get<AIHeroClient>()
                                     .Where(
                                         h =>
-                                            (h.IsValidTarget(1200, false) && h.Team == ObjectManager.Player.Team &&
-                                             !h.IsMe || h.Team != ObjectManager.Player.Team))
+                                            (h.IsValidTarget(1200, false) && h.Team == Variables._Player.Team &&
+                                             !h.IsMe || h.Team != Variables._Player.Team))
                             let pred =
                                 FastPrediction(
                                     @from, hero,
@@ -208,7 +208,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                                 .Any(
                                     hero =>
                                         hero.IsValidTarget(float.MaxValue, false) &&
-                                        hero.Team == ObjectManager.Player.Team && hero.ChampionName == "Yasuo"))
+                                        hero.Team == Variables._Player.Team && hero.ChampionName == "Yasuo"))
                         {
                             break;
                         }

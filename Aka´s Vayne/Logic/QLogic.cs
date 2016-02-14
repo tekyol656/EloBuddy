@@ -28,11 +28,11 @@ namespace AddonTemplate.Logic
             }
 
             const int currentStep = 30;
-            var direction = ObjectManager.Player.Direction.To2D().Perpendicular();
+            var direction = Variables._Player.Direction.To2D().Perpendicular();
             for (var i = 0f; i < 360f; i += currentStep)
             {
                 var angleRad = Geometry.DegreeToRadian(i);
-                var rotatedPosition = ObjectManager.Player.Position.To2D() + (300f * direction.Rotated(angleRad));
+                var rotatedPosition = Variables._Player.Position.To2D() + (300f * direction.Rotated(angleRad));
                 if (NewELogic.GetCondemnTarget(rotatedPosition.To3D()).IsValidTarget() && rotatedPosition.To3D().IsSafe())
                 {
                     return rotatedPosition.To3D();
@@ -58,9 +58,9 @@ namespace AddonTemplate.Logic
                 return false;
             }
 
-            var allies = position.CountAlliesInRange(ObjectManager.Player.AttackRange);
-            var enemies = position.CountEnemiesInRange(ObjectManager.Player.AttackRange);
-            var lhEnemies = position.GetLhEnemiesNear(ObjectManager.Player.AttackRange, 15).Count();
+            var allies = position.CountAlliesInRange(Variables._Player.AttackRange);
+            var enemies = position.CountEnemiesInRange(Variables._Player.AttackRange);
+            var lhEnemies = position.GetLhEnemiesNear(Variables._Player.AttackRange, 15).Count();
 
             if (enemies <= 1) ////It's a 1v1, safe to assume I can Q
             {
@@ -97,7 +97,7 @@ namespace AddonTemplate.Logic
                     }
 
                     var closeEnemies =
-                    EntityManager.Heroes.Enemies.FindAll(en => en.IsValidTarget(1500f) && !(en.Distance(ObjectManager.Player.ServerPosition) < en.AttackRange + 65f))
+                    EntityManager.Heroes.Enemies.FindAll(en => en.IsValidTarget(1500f) && !(en.Distance(Variables._Player.ServerPosition) < en.AttackRange + 65f))
                     .OrderBy(en => en.Distance(position));
 
                     if (
@@ -134,7 +134,7 @@ namespace AddonTemplate.Logic
 
         public static void PreCastTumble(Obj_AI_Base target)
         {
-            if (!target.IsValidTarget(ObjectManager.Player.AttackRange + 65f + 65f + 300f))
+            if (!target.IsValidTarget(Variables._Player.AttackRange + 65f + 65f + 300f))
             {
                 return;
            }
@@ -149,9 +149,9 @@ namespace AddonTemplate.Logic
         private static void OnCastTumble(Obj_AI_Base target, Vector3 position)
         {
             var mode = MenuManager.ComboMenu["Qmode"].Cast<ComboBox>().CurrentValue;
-            var afterTumblePosition = ObjectManager.Player.ServerPosition.Extend(position, 300f);
+            var afterTumblePosition = Variables._Player.ServerPosition.Extend(position, 300f);
             var distanceToTarget = afterTumblePosition.Distance(target.ServerPosition, true);
-            if ((distanceToTarget < Math.Pow(ObjectManager.Player.AttackRange + 65, 2) && distanceToTarget > 110 * 110)
+            if ((distanceToTarget < Math.Pow(Variables._Player.AttackRange + 65, 2) && distanceToTarget > 110 * 110)
                 || MenuManager.Qsettings["UseQspam"].Cast<CheckBox>().CurrentValue)
             {
                 switch (mode)
@@ -177,9 +177,9 @@ namespace AddonTemplate.Logic
                             !Variables.MeleeEnemiesTowardsMe.All(m => m.HealthPercent <= 15))
                         {
                             var Closest =
-                                Variables.MeleeEnemiesTowardsMe.OrderBy(m => m.Distance(ObjectManager.Player)).First();
+                                Variables.MeleeEnemiesTowardsMe.OrderBy(m => m.Distance(Variables._Player)).First();
                             var whereToQ = (Vector3)Closest.ServerPosition.Extend(
-                                ObjectManager.Player.ServerPosition, Closest.Distance(ObjectManager.Player) + 300f);
+                                Variables._Player.ServerPosition, Closest.Distance(Variables._Player) + 300f);
 
                             if (whereToQ.IsSafe())
                             {
@@ -203,7 +203,7 @@ namespace AddonTemplate.Logic
 
         public static Vector3 GetAfterTumblePosition(Vector3 endPosition)
         {
-            return (Vector3)ObjectManager.Player.ServerPosition.Extend(endPosition, 300f);
+            return (Vector3)Variables._Player.ServerPosition.Extend(endPosition, 300f);
         }
 
         public static void DefaultQCast(Vector3 position, Obj_AI_Base Target)
@@ -238,7 +238,7 @@ namespace AddonTemplate.Logic
         private static Vector3? GetQBurstModePosition()
         {
             var positions =
-                GetWallQPositions(70).ToList().OrderBy(pos => pos.Distance(ObjectManager.Player.ServerPosition, true));
+                GetWallQPositions(70).ToList().OrderBy(pos => pos.Distance(Variables._Player.ServerPosition, true));
 
             foreach (var position in positions)
             {
@@ -257,8 +257,8 @@ namespace AddonTemplate.Logic
         {
             Vector3[] vList =
             {
-                (ObjectManager.Player.ServerPosition.To2D() + Range * ObjectManager.Player.Direction.To2D()).To3D(),
-                (ObjectManager.Player.ServerPosition.To2D() - Range * ObjectManager.Player.Direction.To2D()).To3D()
+                (Variables._Player.ServerPosition.To2D() + Range * Variables._Player.Direction.To2D()).To3D(),
+                (Variables._Player.ServerPosition.To2D() - Range * Variables._Player.Direction.To2D()).To3D()
 
             };
 

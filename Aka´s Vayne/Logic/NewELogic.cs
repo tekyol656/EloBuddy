@@ -19,12 +19,12 @@ namespace Aka_s_Vayne_reworked.Logic
                 return;
             }
 
-            var CondemnTarget = GetCondemnTarget(ObjectManager.Player.ServerPosition);
+            var CondemnTarget = GetCondemnTarget(Variables._Player.ServerPosition);
             if (CondemnTarget.IsValidTarget())
             {
                 // var AAForE = MenuExtensions.GetItemValue<Slider>("dz191.vhr.misc.condemn.noeaa").Value;
 
-                // if (CondemnTarget.Health / ObjectManager.Player.GetAutoAttackDamage(CondemnTarget, true) < AAForE)
+                // if (CondemnTarget.Health / Variables._Player.GetAutoAttackDamage(CondemnTarget, true) < AAForE)
                 // {
                 //     return;
                 // }
@@ -43,9 +43,9 @@ namespace Aka_s_Vayne_reworked.Logic
                     return;
                 }
 
-                if (GetCondemnTarget(ObjectManager.Player.ServerPosition).IsValidTarget())
+                if (GetCondemnTarget(Variables._Player.ServerPosition).IsValidTarget())
                 {
-                    if (!Shine.GetTarget(ObjectManager.Player.ServerPosition).IsValidTarget())
+                    if (!Shine.GetTarget(Variables._Player.ServerPosition).IsValidTarget())
                     {
                         args.Process = false;
                     }
@@ -98,7 +98,7 @@ namespace Aka_s_Vayne_reworked.Logic
                     }
 
                     if (target.Health + 10 <=
-                        ObjectManager.Player.GetAutoAttackDamage(target) *
+                        Variables._Player.GetAutoAttackDamage(target) *
                         MenuManager.CondemnMenu["noeaa"].Cast<Slider>().CurrentValue)
                     {
                         return null;
@@ -119,7 +119,7 @@ namespace Aka_s_Vayne_reworked.Logic
             {
                 var pushDistance = MenuManager.CondemnMenu["pushDistance"].Cast<Slider>().CurrentValue;
                 var targetPosition = Program.E2.GetPrediction(target).UnitPosition;
-                var pushDirection = (targetPosition - ObjectManager.Player.ServerPosition).Normalized();
+                var pushDirection = (targetPosition - Variables._Player.ServerPosition).Normalized();
                 float checkDistance = pushDistance / 40f;
                 for (int i = 0; i < 40; i++)
                 {
@@ -134,7 +134,7 @@ namespace Aka_s_Vayne_reworked.Logic
                         }
 
                         if (target.Health + 10 <=
-                                        ObjectManager.Player.GetAutoAttackDamage(target) *
+                                        Variables._Player.GetAutoAttackDamage(target) *
                                         MenuManager.CondemnMenu["noeaa"].Cast<Slider>().CurrentValue)
                         {
                             return null;
@@ -183,7 +183,7 @@ namespace Aka_s_Vayne_reworked.Logic
                     {
 
                         if (target.Health + 10 <=
-                            ObjectManager.Player.GetAutoAttackDamage(target) *
+                            Variables._Player.GetAutoAttackDamage(target) *
                             MenuManager.CondemnMenu["noeaa"].Cast<Slider>().CurrentValue)
                         {
                             return null;
@@ -227,7 +227,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 }
 
                 if (Hero.Health + 10 <=
-                    ObjectManager.Player.GetAutoAttackDamage(Hero) *
+                    Variables._Player.GetAutoAttackDamage(Hero) *
                     MenuManager.CondemnMenu["noeaa"].Cast<Slider>().CurrentValue)
                 {
                     continue;
@@ -304,7 +304,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 }
 
                 if (Hero.Health + 10 <=
-                    ObjectManager.Player.GetAutoAttackDamage(Hero) *
+                    Variables._Player.GetAutoAttackDamage(Hero) *
                     MenuManager.CondemnMenu["noeaa"].Cast<Slider>().CurrentValue)
                 {
                     continue;
@@ -312,8 +312,8 @@ namespace Aka_s_Vayne_reworked.Logic
 
 
                 var targetPosition = Program.E2.GetPrediction(Hero).UnitPosition;
-                var finalPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -PushDistance);
-                var finalPosition_ex = Hero.ServerPosition.Extend(ObjectManager.Player.ServerPosition, -PushDistance);
+                var finalPosition = targetPosition.Extend(Variables._Player.ServerPosition, -PushDistance);
+                var finalPosition_ex = Hero.ServerPosition.Extend(Variables._Player.ServerPosition, -PushDistance);
 
                 var condemnRectangle = new VHRPolygon(VHRPolygon.Rectangle(targetPosition.To2D(), finalPosition, Hero.BoundingRadius));
                 var condemnRectangle_ex = new VHRPolygon(VHRPolygon.Rectangle(Hero.ServerPosition.To2D(), finalPosition_ex, Hero.BoundingRadius));
@@ -337,7 +337,7 @@ namespace Aka_s_Vayne_reworked.Logic
             var positions =
                 GetWallQPositions(target, 110).ToList().OrderBy(pos => pos.Distance(target.ServerPosition, true));
             var positions_ex =
-            GetWallQPositions(ObjectManager.Player, 110).ToList().OrderBy(pos => pos.Distance(ObjectManager.Player.ServerPosition, true));
+            GetWallQPositions(Variables._Player, 110).ToList().OrderBy(pos => pos.Distance(Variables._Player.ServerPosition, true));
 
             if (positions.Any(p => NavMesh.GetCollisionFlags(p).HasFlag(CollisionFlags.Wall) || NavMesh.GetCollisionFlags(p).HasFlag(CollisionFlags.Building)) && positions_ex.Any(p => NavMesh.GetCollisionFlags(p).HasFlag(CollisionFlags.Wall) || NavMesh.GetCollisionFlags(p).HasFlag(CollisionFlags.Building)))
             {

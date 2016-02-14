@@ -45,7 +45,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
 
         private static void GameObject_OnDelete(GameObject sender, EventArgs args)
         {
-            if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
+            if (!sender.IsValid || sender.Team == Variables._Player.Team)
             {
                 return;
             }
@@ -71,7 +71,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
             var missile = (MissileClient) sender;
 
             var unit = missile.SpellCaster;
-            if (!unit.IsValid || (unit.Team == ObjectManager.Player.Team))
+            if (!unit.IsValid || (unit.Team == Variables._Player.Team))
             {
                 return;
             }
@@ -123,7 +123,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
             }
 
             var unit = (AIHeroClient) missile.SpellCaster;
-            if (!unit.IsValid || (unit.Team == ObjectManager.Player.Team))
+            if (!unit.IsValid || (unit.Team == Variables._Player.Team))
             {
                 return;
             }
@@ -190,7 +190,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                     s => s.Caster.NetworkId == sender.NetworkId && s.SpellData.SpellName == "DravenRCast");
             }
 
-            if (!sender.IsValid || sender.Team == ObjectManager.Player.Team)
+            if (!sender.IsValid || sender.Team == Variables._Player.Team)
             {
                 return;
             }
@@ -244,7 +244,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
             var endPos = args.End.To2D();
 
             if (spellData.SpellName == "LucianQ" && args.Target != null &&
-                args.Target.NetworkId == ObjectManager.Player.NetworkId)
+                args.Target.NetworkId == Variables._Player.NetworkId)
             {
                 return;
             }

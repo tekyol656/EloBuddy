@@ -238,7 +238,7 @@ DamageType.Physical);
             if (meleeEnemies.Any())
             {
                 var mostDangerous =
-                    meleeEnemies.OrderByDescending(m => m.GetAutoAttackDamage(ObjectManager.Player)).First();
+                    meleeEnemies.OrderByDescending(m => m.GetAutoAttackDamage(Variables._Player)).First();
                 Program.E.Cast(mostDangerous);
             }
         }
@@ -253,18 +253,18 @@ DamageType.Physical);
                 return;
             }
 
-            if (currentTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition) <=
+            if (currentTarget.ServerPosition.Distance(Variables._Player.ServerPosition) <=
                 Variables._Player.GetAutoAttackRange())
             {
                 return;
             }
 
             if (currentTarget.Health <
-                ObjectManager.Player.GetAutoAttackDamage(currentTarget) +
+                Variables._Player.GetAutoAttackDamage(currentTarget) +
                 Variables._Player.GetSpellDamage(currentTarget, SpellSlot.Q)
                 && currentTarget.Health > 0)
             {
-                var extendedPosition = (Vector3)ObjectManager.Player.ServerPosition.Extend(
+                var extendedPosition = (Vector3)Variables._Player.ServerPosition.Extend(
                     currentTarget.ServerPosition, 300f);
                 if (extendedPosition.IsSafe())
                 {

@@ -73,9 +73,9 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
 
         public bool IsReady()
         {
-            return ((CheckSpellName == "" || ObjectManager.Player.Spellbook.GetSpell(Slot).Name == CheckSpellName) &&
-                    ((IsSummonerSpell && ObjectManager.Player.Spellbook.CanUseSpell(Slot) == SpellState.Ready) ||
-                     (!IsSummonerSpell && ObjectManager.Player.Spellbook.CanUseSpell(Slot) == SpellState.Ready)));
+            return ((CheckSpellName == "" || Variables._Player.Spellbook.GetSpell(Slot).Name == CheckSpellName) &&
+                    ((IsSummonerSpell && Variables._Player.Spellbook.CanUseSpell(Slot) == SpellState.Ready) ||
+                     (!IsSummonerSpell && Variables._Player.Spellbook.CanUseSpell(Slot) == SpellState.Ready)));
         }
     }
 

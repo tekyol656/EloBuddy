@@ -30,7 +30,7 @@ namespace Aka_s_Vayne_reworked.Logic
             var positions = DashHelper.GetRotatedQPositions();
             var enemyPositions = DashHelper.GetEnemyPoints();
             var safePositions = positions.Where(pos => !enemyPositions.Contains(pos.To2D())).ToList();
-            var BestPosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 300f);
+            var BestPosition = Variables._Player.ServerPosition.Extend(Game.CursorPos, 300f);
             var AverageDistanceWeight = .60f;
             var ClosestDistanceWeight = .40f;
 
@@ -50,11 +50,11 @@ namespace Aka_s_Vayne_reworked.Logic
 
             #region 1 Enemy around only Defensive
 
-            if (ObjectManager.Player.CountEnemiesInRange(1500f) <= 1 && MenuManager.ComboMenu["Qmode2"].Cast<ComboBox>().CurrentValue == 1)
+            if (Variables._Player.CountEnemiesInRange(1500f) <= 1 && MenuManager.ComboMenu["Qmode2"].Cast<ComboBox>().CurrentValue == 1)
             {
                 //Logic for 1 enemy near
                 var backwardsPosition =
-                    (ObjectManager.Player.ServerPosition.To2D() + 300f*ObjectManager.Player.Direction.To2D()).To3D();
+                    (Variables._Player.ServerPosition.To2D() + 300f*Variables._Player.Direction.To2D()).To3D();
 
                 if (!other.UnderEnemyTower((Vector2) backwardsPosition))
                 {
@@ -67,10 +67,10 @@ namespace Aka_s_Vayne_reworked.Logic
 
             #region 1 Enemy around only Aggressive
 
-            if (ObjectManager.Player.CountEnemiesInRange(1500f) <= 1 && MenuManager.ComboMenu["Qmode2"].Cast<ComboBox>().CurrentValue == 0)
+            if (Variables._Player.CountEnemiesInRange(1500f) <= 1 && MenuManager.ComboMenu["Qmode2"].Cast<ComboBox>().CurrentValue == 0)
             {
                 //Logic for 1 enemy near
-                var position = (Vector3)ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 300f);
+                var position = (Vector3)Variables._Player.ServerPosition.Extend(Game.CursorPos, 300f);
                 return position.To2D().IsSafeEx() ? position : Vector3.Zero;
             }
 
@@ -84,12 +84,12 @@ namespace Aka_s_Vayne_reworked.Logic
                     enemiesNear.Any(
                         t =>
                             t.Health + 15 <
-                            ObjectManager.Player.GetAutoAttackDamage(t) +
+                            Variables._Player.GetAutoAttackDamage(t) +
                             Variables._Player.GetSpellDamage(t, SpellSlot.Q)
-                            && t.Distance(ObjectManager.Player) < Variables._Player.GetAutoAttackRange(t) + 80f))
+                            && t.Distance(Variables._Player) < Variables._Player.GetAutoAttackRange(t) + 80f))
                 {
                     var QPosition =
-                        ObjectManager.Player.ServerPosition.Extend(
+                        Variables._Player.ServerPosition.Extend(
                             highHealthEnemiesNear.OrderBy(t => t.Health).FirstOrDefault().ServerPosition, 300f);
 
                     if (!other.UnderEnemyTower(QPosition))
@@ -109,7 +109,7 @@ namespace Aka_s_Vayne_reworked.Logic
 
                 //If there is a killable enemy among those. 
                 var backwardsPosition =
-                    (ObjectManager.Player.ServerPosition.To2D() + 300f*ObjectManager.Player.Direction.To2D()).To3D();
+                    (Variables._Player.ServerPosition.To2D() + 300f*Variables._Player.Direction.To2D()).To3D();
 
                 if (!other.UnderEnemyTower((Vector2) backwardsPosition))
                 {
@@ -122,14 +122,14 @@ namespace Aka_s_Vayne_reworked.Logic
             #region Already in an enemy's attack range.
 
             var closeNonMeleeEnemy =
-                DashHelper.GetClosestEnemy((Vector3) ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 300f));
+                DashHelper.GetClosestEnemy((Vector3) Variables._Player.ServerPosition.Extend(Game.CursorPos, 300f));
 
             if (closeNonMeleeEnemy != null
-                && ObjectManager.Player.Distance(closeNonMeleeEnemy) <= closeNonMeleeEnemy.AttackRange - 85
+                && Variables._Player.Distance(closeNonMeleeEnemy) <= closeNonMeleeEnemy.AttackRange - 85
                 && !closeNonMeleeEnemy.IsMelee)
             {
-                return ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 300f).IsSafeEx()
-                    ? ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 300f).To3D()
+                return Variables._Player.ServerPosition.Extend(Game.CursorPos, 300f).IsSafeEx()
+                    ? Variables._Player.ServerPosition.Extend(Game.CursorPos, 300f).To3D()
                     : Vector3.Zero;
             }
 
@@ -149,7 +149,7 @@ namespace Aka_s_Vayne_reworked.Logic
 
                 if (avgDist > -1)
                 {
-                    var closestDist = ObjectManager.Player.ServerPosition.Distance(enemy.ServerPosition);
+                    var closestDist = Variables._Player.ServerPosition.Distance(enemy.ServerPosition);
                     var weightedAvg = closestDist*ClosestDistanceWeight + avgDist*AverageDistanceWeight;
                     if (weightedAvg > bestWeightedAvg && position.To2D().IsSafeEx())
                     {
@@ -174,19 +174,19 @@ namespace Aka_s_Vayne_reworked.Logic
                 if (alliesClose.Any() && enemiesNear.Any())
                 {
                     var closestMostHealth =
-                        alliesClose.OrderBy(m => m.Distance(ObjectManager.Player))
+                        alliesClose.OrderBy(m => m.Distance(Variables._Player))
                             .ThenByDescending(m => m.Health)
                             .FirstOrDefault();
 
                     if (closestMostHealth != null
                         &&
                         closestMostHealth.Distance(
-                            enemiesNear.OrderBy(m => m.Distance(ObjectManager.Player)).FirstOrDefault())
+                            enemiesNear.OrderBy(m => m.Distance(Variables._Player)).FirstOrDefault())
                         >
-                        ObjectManager.Player.Distance(
-                            enemiesNear.OrderBy(m => m.Distance(ObjectManager.Player)).FirstOrDefault()))
+                        Variables._Player.Distance(
+                            enemiesNear.OrderBy(m => m.Distance(Variables._Player)).FirstOrDefault()))
                     {
-                        var tempPosition = ObjectManager.Player.ServerPosition.Extend(closestMostHealth.ServerPosition,
+                        var tempPosition = Variables._Player.ServerPosition.Extend(closestMostHealth.ServerPosition,
                             300f);
                         if (tempPosition.IsSafeEx())
                         {
@@ -204,7 +204,7 @@ namespace Aka_s_Vayne_reworked.Logic
 
             if (endPosition == Vector3.Zero)
             {
-                var mousePosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 300f);
+                var mousePosition = Variables._Player.ServerPosition.Extend(Game.CursorPos, 300f);
                 if (mousePosition.To3D().IsSafe())
                 {
                     endPosition = mousePosition.To3D();
@@ -553,14 +553,14 @@ namespace Aka_s_Vayne_reworked.Logic
         public static List<Vector3> GetRotatedQPositions()
         {
             const int currentStep = 30;
-            // var direction = ObjectManager.Player.Direction.To2D().Perpendicular();
-            var direction = (Game.CursorPos - ObjectManager.Player.ServerPosition).Normalized().To2D();
+            // var direction = Variables._Player.Direction.To2D().Perpendicular();
+            var direction = (Game.CursorPos - Variables._Player.ServerPosition).Normalized().To2D();
 
             var list = new List<Vector3>();
             for (var i = -105; i <= 105; i += currentStep)
             {
                 var angleRad = Geometry.DegreeToRadian(i);
-                var rotatedPosition = ObjectManager.Player.Position.To2D() + (300f*direction.Rotated(angleRad));
+                var rotatedPosition = Variables._Player.Position.To2D() + (300f*direction.Rotated(angleRad));
                 list.Add(rotatedPosition.To3D());
             }
             return list;
@@ -596,7 +596,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 EntityManager.Heroes.Enemies.FindAll(
                     en =>
                         en.IsValidTarget(1500f) &&
-                        !(en.Distance(ObjectManager.Player.ServerPosition) < en.AttackRange + 65f))
+                        !(en.Distance(Variables._Player.ServerPosition) < en.AttackRange + 65f))
                     .OrderBy(en => en.Distance(position));
 
             return closeEnemies.All(
@@ -617,7 +617,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 var enemies = EntityManager.Heroes.Enemies.Where(en => en.IsValidTarget(1200f, true, from)
                                                                        &&
                                                                        en.Health >
-                                                                       ObjectManager.Player.GetAutoAttackDamage(en)*3 +
+                                                                       Variables._Player.GetAutoAttackDamage(en)*3 +
                                                                        Variables._Player.GetSpellDamage(en, SpellSlot.W) +
                                                                        Variables._Player.GetSpellDamage(en, SpellSlot.Q)).ToList()
                     ;
@@ -625,8 +625,8 @@ namespace Aka_s_Vayne_reworked.Logic
                 var LHEnemies = enemiesEx.Count() - enemies.Count();
 
                 var totalDistance = (LHEnemies > 1 && enemiesEx.Count() > 2)
-                    ? enemiesEx.Sum(en => en.Distance(ObjectManager.Player.ServerPosition))
-                    : enemies.Sum(en => en.Distance(ObjectManager.Player.ServerPosition));
+                    ? enemiesEx.Sum(en => en.Distance(Variables._Player.ServerPosition))
+                    : enemies.Sum(en => en.Distance(Variables._Player.ServerPosition));
 
                 return totalDistance/numberOfEnemies;
             }
@@ -674,7 +674,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 return
                     EntityManager.Heroes.Enemies.Where(
                         m =>
-                            m.Distance(ObjectManager.Player, true) <= Math.Pow(1000, 2) && m.IsValidTarget(1500) &&
+                            m.Distance(Variables._Player, true) <= Math.Pow(1000, 2) && m.IsValidTarget(1500) &&
                             m.CountEnemiesInRange(m.IsMelee ? m.AttackRange*1.5f : m.AttackRange + 20*1.5f) > 0);
             }
         }
@@ -695,7 +695,7 @@ namespace Aka_s_Vayne_reworked.Logic
                    &&
                    (!other.UnderEnemyTower((Vector2) position) ||
                     (other.UnderEnemyTower((Vector2) Variables._Player.ServerPosition) &&
-                     other.UnderEnemyTower((Vector2) position) && ObjectManager.Player.HealthPercent > 10));
+                     other.UnderEnemyTower((Vector2) position) && Variables._Player.HealthPercent > 10));
             //Either it is not under turret or both the player and the position are under turret already and the health percent is greater than 10.
         }
 
@@ -716,8 +716,8 @@ namespace Aka_s_Vayne_reworked.Logic
                 EntityManager.Heroes.Allies.Where(a => a.IsValidTarget(range, false) && a.HealthPercent < 10 && !a.IsMe);
             var lowHealthEnemies =
                 EntityManager.Heroes.Allies.Where(a => a.IsValidTarget(range) && a.HealthPercent < 10);
-            var enemies = ObjectManager.Player.CountEnemiesInRange(range);
-            var allies = ObjectManager.Player.CountAlliesInRange(range);
+            var enemies = Variables._Player.CountEnemiesInRange(range);
+            var allies = Variables._Player.CountAlliesInRange(range);
             var enemyTurrets = Turrets.EnemyTurrets.Where(m => m.IsValidTarget(975f));
             var allyTurrets = Turrets.AllyTurrets.Where(m => m.IsValidTarget(975f, false));
 
@@ -736,7 +736,7 @@ namespace Aka_s_Vayne_reworked.Logic
 
             var enemyPoints = DashHelper.GetEnemyPoints();
             if (enemyPoints.ToList().Contains(position.To2D()) &&
-                !enemyPoints.Contains(ObjectManager.Player.ServerPosition.To2D()))
+                !enemyPoints.Contains(Variables._Player.ServerPosition.To2D()))
             {
                 return false;
             }
@@ -745,7 +745,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 EntityManager.Heroes.Enemies.FindAll(
                     en =>
                         en.IsValidTarget(1500f) &&
-                        !(en.Distance(ObjectManager.Player.ServerPosition) < en.AttackRange + 65f));
+                        !(en.Distance(Variables._Player.ServerPosition) < en.AttackRange + 65f));
             if (!closeEnemies.All(enemy => position.CountEnemiesInRange(enemy.AttackRange) <= 1))
             {
                 return false;
@@ -759,7 +759,7 @@ namespace Aka_s_Vayne_reworked.Logic
 
             var enemyPoints = DashHelper.GetEnemyPoints();
             if (enemyPoints.ToList().Contains(position) &&
-                !enemyPoints.Contains(ObjectManager.Player.ServerPosition.To2D()))
+                !enemyPoints.Contains(Variables._Player.ServerPosition.To2D()))
             {
                 return false;
             }
@@ -768,7 +768,7 @@ namespace Aka_s_Vayne_reworked.Logic
                 EntityManager.Heroes.Enemies.FindAll(
                     en =>
                         en.IsValidTarget(1500f) &&
-                        !(en.Distance(ObjectManager.Player.ServerPosition) < en.AttackRange + 65f));
+                        !(en.Distance(Variables._Player.ServerPosition) < en.AttackRange + 65f));
             if (!closeEnemies.All(enemy => position.CountEnemiesInRange(enemy.AttackRange) <= 1))
             {
                 return false;

@@ -149,7 +149,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                 {
                     return GlobalGetMissilePosition(0) +
                            Direction * SpellData.MissileSpeed *
-                           (0.5f + SpellData.Radius * 2 / ObjectManager.Player.MoveSpeed);
+                           (0.5f + SpellData.Radius * 2 / Variables._Player.MoveSpeed);
                 }
 
                 return End;
@@ -219,7 +219,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                         0,
                         !SpellData.AddHitbox
                             ? SpellData.Radius
-                            : (SpellData.Radius - ObjectManager.Player.BoundingRadius));
+                            : (SpellData.Radius - Variables._Player.BoundingRadius));
                     break;
                 case SkillShotType.SkillshotLine:
                     Polygon = Rectangle.ToPolygon();
@@ -227,7 +227,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                         0,
                         !SpellData.AddHitbox
                             ? SpellData.Radius
-                            : (SpellData.Radius - ObjectManager.Player.BoundingRadius));
+                            : (SpellData.Radius - Variables._Player.BoundingRadius));
                     EvadePolygon = Rectangle.ToPolygon(ExtraEvadeDistance);
                     break;
                 case SkillShotType.SkillshotMissileLine:
@@ -236,7 +236,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                         0,
                         !SpellData.AddHitbox
                             ? SpellData.Radius
-                            : (SpellData.Radius - ObjectManager.Player.BoundingRadius));
+                            : (SpellData.Radius - Variables._Player.BoundingRadius));
                     EvadePolygon = Rectangle.ToPolygon(ExtraEvadeDistance);
                     break;
                 case SkillShotType.SkillshotCone:
@@ -311,7 +311,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
         {
             timeOffset /= 2;
 
-            if (IsSafe(ObjectManager.Player.ServerPosition.To2D()))
+            if (IsSafe(Variables._Player.ServerPosition.To2D()))
             {
                 return true;
             }
@@ -320,7 +320,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
             if (SpellData.Type == SkillShotType.SkillshotMissileLine)
             {
                 var missilePositionAfterBlink = GetMissilePosition(delay + timeOffset);
-                var myPositionProjection = ObjectManager.Player.ServerPosition.To2D().ProjectOn(Start, End);
+                var myPositionProjection = Variables._Player.ServerPosition.To2D().ProjectOn(Start, End);
 
                 if (missilePositionAfterBlink.Distance(End) < myPositionProjection.SegmentPoint.Distance(End))
                 {
@@ -346,7 +346,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
             var distance = 0f;
             timeOffset += Game.Ping / 2;
 
-            speed = (speed == -1) ? (int) ObjectManager.Player.MoveSpeed : speed;
+            speed = (speed == -1) ? (int) Variables._Player.MoveSpeed : speed;
 
             var allIntersections = new List<FoundIntersection>();
             for (var i = 0; i <= path.Count - 2; i++)
@@ -383,7 +383,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                 SpellData.Type == SkillShotType.SkillshotMissileCone)
             {
                 //Outside the skillshot
-                if (IsSafe(ObjectManager.Player.ServerPosition.To2D()))
+                if (IsSafe(Variables._Player.ServerPosition.To2D()))
                 {
                     //No intersections -> Safe
                     if (allIntersections.Count == 0)
@@ -405,7 +405,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
                                 new SafePathResult(
                                     (End.Distance(missilePositionOnIntersection) + 50 <=
                                      End.Distance(enterIntersectionProjection)) &&
-                                    ObjectManager.Player.MoveSpeed < SpellData.MissileSpeed, allIntersections[0]);
+                                    Variables._Player.MoveSpeed < SpellData.MissileSpeed, allIntersections[0]);
                         }
 
 
@@ -449,7 +449,7 @@ namespace Aka_s_Vayne_reworked.Evade.Utility
             }
 
 
-            if (IsSafe(ObjectManager.Player.ServerPosition.To2D()))
+            if (IsSafe(Variables._Player.ServerPosition.To2D()))
             {
                 if (allIntersections.Count == 0)
                 {

@@ -37,7 +37,7 @@ namespace Aka_s_Vayne_reworked
             E = new Spell.Targeted(SpellSlot.E, 590);
             E2 = new Spell.Skillshot(SpellSlot.E, 590, SkillShotType.Linear, 250, 1250);
             R = new Spell.Active(SpellSlot.R);
-            var slot = ObjectManager.Player.GetSpellSlotFromName("summonerheal");
+            var slot = Variables._Player.GetSpellSlotFromName("summonerheal");
             if (slot != SpellSlot.Unknown)
             {
                 Heal = new Spell.Active(slot, 600);
