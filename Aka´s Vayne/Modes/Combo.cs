@@ -39,6 +39,11 @@ namespace Aka_s_Vayne_reworked.Modes
                 if (target == null) return;
                 QLogic.PreCastTumble(target);
             }
+
+            if (MenuManager.ComboMenu["UseQwhen"].Cast<ComboBox>().CurrentValue == 2)
+            {
+                return;
+            }
         }
 
         public static void UseE()

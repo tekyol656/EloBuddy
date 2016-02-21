@@ -65,6 +65,23 @@ namespace Aka_s_Vayne_reworked.Logic
 
             #endregion
 
+            if (
+        enemiesNear.Any(
+            t =>
+                t.Health + 15 <
+                ObjectManager.Player.GetAutoAttackDamage(t) * 2 + Variables._Player.GetSpellDamage(t, SpellSlot.Q)
+                && t.Distance(ObjectManager.Player) < Variables._Player.GetAutoAttackRange(t) + 80f))
+            {
+                var QPosition =
+                    ObjectManager.Player.ServerPosition.Extend(
+                        enemiesNear.OrderBy(t => t.Health).First().ServerPosition, 300f);
+
+                if (!other.UnderEnemyTower(QPosition))
+                {
+                    return (Vector3)QPosition;
+                }
+            }
+
             #region 1 Enemy around only Aggressive
 
             if (Variables._Player.CountEnemiesInRange(1500f) <= 1 && MenuManager.ComboMenu["Qmode2"].Cast<ComboBox>().CurrentValue == 0)
@@ -113,7 +130,7 @@ namespace Aka_s_Vayne_reworked.Logic
 
                 if (!other.UnderEnemyTower((Vector2) backwardsPosition))
                 {
-                    return backwardsPosition;
+                   // return backwardsPosition;
                 }
             }
 
@@ -557,7 +574,7 @@ namespace Aka_s_Vayne_reworked.Logic
             var direction = (Game.CursorPos - Variables._Player.ServerPosition).Normalized().To2D();
 
             var list = new List<Vector3>();
-            for (var i = -105; i <= 105; i += currentStep)
+            for (var i = -70; i <= 70; i += currentStep)
             {
                 var angleRad = Geometry.DegreeToRadian(i);
                 var rotatedPosition = Variables._Player.Position.To2D() + (300f*direction.Rotated(angleRad));

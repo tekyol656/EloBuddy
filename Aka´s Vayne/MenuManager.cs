@@ -51,7 +51,7 @@ namespace Aka_s_Vayne_reworked
             ComboMenu = VMenu.AddSubMenu("Combo", "Combo");
             ComboMenu.AddGroupLabel("Combo");
             ComboMenu.AddGroupLabel("Q Mode");
-            var qmode = ComboMenu.Add("Qmode", new ComboBox("Q Mode", 1, "Mouse", "Smart", "Kite", "Old"));
+            var qmode = ComboMenu.Add("Qmode", new ComboBox("Q Mode", 1, "Mouse", "Smart", "Kite", "Old", "New"));
             qmode.OnValueChange += delegate
             {
                 if (qmode.CurrentValue == 1)
@@ -60,6 +60,10 @@ namespace Aka_s_Vayne_reworked
                     Qsettings["UseQE"].IsVisible = true;
                     Qsettings["QE"].IsVisible = true;
                     Qsettings["UseQspam"].IsVisible = true;
+                    Qsettings["QNmode"].IsVisible = false;
+                    Qsettings["QNenemies"].IsVisible = false;
+                    Qsettings["QNWall"].IsVisible = false;
+                    Qsettings["QNTurret"].IsVisible = false;
                 }
                 if (qmode.CurrentValue == 3)
                 {
@@ -67,6 +71,10 @@ namespace Aka_s_Vayne_reworked
                     Qsettings["UseQE"].IsVisible = false;
                     Qsettings["QE"].IsVisible = false;
                     Qsettings["UseQspam"].IsVisible = false;
+                    Qsettings["QNmode"].IsVisible = false;
+                    Qsettings["QNenemies"].IsVisible = false;
+                    Qsettings["QNWall"].IsVisible = false;
+                    Qsettings["QNTurret"].IsVisible = false;
                 }
                 if (qmode.CurrentValue == 2)
                 {
@@ -74,6 +82,10 @@ namespace Aka_s_Vayne_reworked
                     Qsettings["UseQE"].IsVisible = false;
                     Qsettings["QE"].IsVisible = false;
                     Qsettings["UseQspam"].IsVisible = false;
+                    Qsettings["QNmode"].IsVisible = false;
+                    Qsettings["QNenemies"].IsVisible = false;
+                    Qsettings["QNWall"].IsVisible = false;
+                    Qsettings["QNTurret"].IsVisible = false;
                 }
                 if (qmode.CurrentValue == 0)
                 {
@@ -81,10 +93,25 @@ namespace Aka_s_Vayne_reworked
                     Qsettings["UseQE"].IsVisible = false;
                     Qsettings["QE"].IsVisible = false;
                     Qsettings["UseQspam"].IsVisible = false;
+                    Qsettings["QNmode"].IsVisible = false;
+                    Qsettings["QNenemies"].IsVisible = false;
+                    Qsettings["QNWall"].IsVisible = false;
+                    Qsettings["QNTurret"].IsVisible = false;
+                }
+                if (qmode.CurrentValue == 4)
+                {
+                    Qsettings["UseSafeQ"].IsVisible = false;
+                    Qsettings["UseQE"].IsVisible = false;
+                    Qsettings["QE"].IsVisible = false;
+                    Qsettings["UseQspam"].IsVisible = false;
+                    Qsettings["QNmode"].IsVisible = true;
+                    Qsettings["QNenemies"].IsVisible = true;
+                    Qsettings["QNWall"].IsVisible = true;
+                    Qsettings["QNTurret"].IsVisible = true;
                 }
             };
             ComboMenu.Add("Qmode2", new ComboBox("Smart Mode", 0, "Aggressive", "Defensive"));
-            ComboMenu.Add("UseQwhen", new ComboBox("Use Q", 0, "After Attack", "Before Attack"));
+            ComboMenu.Add("UseQwhen", new ComboBox("Use Q", 0, "After Attack", "Before Attack", "Never"));
             ComboMenu.AddGroupLabel("AA Resets");
             ComboMenu.AddLabel("Once you untick´d the AA Reset you have to reload[F5]");
             ComboMenu.Add("AAReset", new CheckBox("Use my AA Reset"));
@@ -108,10 +135,17 @@ namespace Aka_s_Vayne_reworked
             Qsettings.AddGroupLabel("Q Settings");
             Qsettings.AddLabel("In Burstmode Vayne will Tumble in Walls for a faster Reset.");
             Qsettings.Add("Mirin", new CheckBox("Burstmode"));
+            //smart
             Qsettings.Add("UseSafeQ", new CheckBox("Dynamic Q Safety?", false)).IsVisible = true;
             Qsettings.Add("UseQE", new CheckBox("Dont Q into enemies?", false)).IsVisible = true;
             Qsettings.Add("QE", new CheckBox("Try to QE?", false)).IsVisible = true;
             Qsettings.Add("UseQspam", new CheckBox("Ignore checks", false)).IsVisible = true;
+            //new
+            Qsettings.Add("QNmode", new ComboBox("New Mode", 1, "Side", "Safe Position")).IsVisible = false;
+            Qsettings.Add("QNenemies", new Slider("Block Q in x enemies", 3, 5, 0)).IsVisible = false;
+            Qsettings.Add("QNWall", new CheckBox("Block Q in Wall", true)).IsVisible = false;
+            Qsettings.Add("QNTurret", new CheckBox("Block Q Undertower", true)).IsVisible = false;
+
         }
 
         public static void Condemnmenu()

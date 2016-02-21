@@ -57,9 +57,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activator\Functions.cs" />
-    <Compile Include="Activator\Itemlist.cs" />
-    <Compile Include="Activator\PermaActive.cs" />
     <Compile Include="Damages.cs" />
     <Compile Include="Evade\EvadeHelper.cs" />
     <Compile Include="Evade\Utility\Collision.cs" />
