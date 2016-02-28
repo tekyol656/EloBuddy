@@ -1,2 +1,14 @@
 C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Debug\Aka´s Vayne reworked.exe.config
 C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\Aka´s Vayne reworked.exe.config
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\Aka´s Vayne reworked.exe
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\Aka´s Vayne reworked.pdb
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\EloBuddy.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\EloBuddy.Sandbox.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\EloBuddy.SDK.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\SharpDX.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\bin\Release\Newtonsoft.Json.dll
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\obj\Debug\Aka´s Vayne.csprojResolveAssemblyReference.cache
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\obj\Debug\Aka´s Vayne.csproj.Aka´s Vayne reworked.exe.config
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\obj\Debug\Aka´s Vayne reworked.exe
+C:\Users\Alex\Documents\GitHub\EloBuddy\Aka´s Vayne\obj\Debug\Aka´s Vayne reworked.pdb
