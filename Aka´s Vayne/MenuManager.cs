@@ -153,7 +153,7 @@ namespace Aka_s_Vayne_reworked
             CondemnMenu = VMenu.AddSubMenu("Condemn", "Condemn");
             CondemnMenu.AddGroupLabel("Condemn");
             CondemnMenu.AddLabel("Shine deactivated atm! Use Aka instead of it!");
-            CondemnMenu.Add("Condemnmode", new ComboBox("Condemn Mode", 0, "Best", "New", "Marksman", "Shine", "Aka"));
+            CondemnMenu.Add("Condemnmode", new ComboBox("Condemn Mode", 4, "Best", "New", "Marksman", "Shine", "Aka"));
             CondemnMenu.Add("UseEauto", new CheckBox("Use auto E?"));
             CondemnMenu.Add("UseEc", new CheckBox("Only Stun current target?", false));
             CondemnMenu.Add("condemnPercent", new Slider("Condemn Hitchance %", 33, 1));
