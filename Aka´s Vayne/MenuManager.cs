@@ -51,8 +51,8 @@ namespace Aka_s_Vayne_reworked
             ComboMenu = VMenu.AddSubMenu("Combo", "Combo");
             ComboMenu.AddGroupLabel("Combo");
             ComboMenu.AddGroupLabel("Q Mode");
-            ComboMenu.AddGroupLabel("Smart mode disabled, i hope it´s causing the problems. Use New or Old.");
-            var qmode = ComboMenu.Add("Qmode", new ComboBox("Q Mode", 4, "Mouse", "Smart", "Kite", "Old", "New"));
+            ComboMenu.AddLabel("Smart mode disabled. Use New or Old.");
+            var qmode = ComboMenu.Add("Qmode", new ComboBox("Q Mode", 4, "Mouse", "Smart(disabled)", "Kite", "Old", "New"));
             qmode.OnValueChange += delegate
             {
                 if (qmode.CurrentValue == 1)
@@ -115,8 +115,8 @@ namespace Aka_s_Vayne_reworked
             ComboMenu.Add("UseQwhen", new ComboBox("Use Q", 0, "After Attack", "Before Attack", "Never"));
             ComboMenu.AddGroupLabel("AA Resets");
             ComboMenu.AddLabel("Once you untick´d the AA Reset you have to reload[F5]");
-            ComboMenu.Add("AAReset", new CheckBox("Use my AA Reset"));
-            ComboMenu.AddLabel("If your AA´s Cancel use this, or deactivate my AA Reset.");
+            ComboMenu.Add("AAReset", new CheckBox("Use custom Orbwalk for faster Kite"));
+            ComboMenu.AddLabel("If your AA´s Cancel use this or deactivate the custom Orbwalk.");
             ComboMenu.Add("AACancel", new Slider("AA Cancel", 0, 0, 20));
             ComboMenu.AddGroupLabel("W Settings");
             ComboMenu.Add("focusw", new CheckBox("Focus W", false));
@@ -153,13 +153,15 @@ namespace Aka_s_Vayne_reworked
         {
             CondemnMenu = VMenu.AddSubMenu("Condemn", "Condemn");
             CondemnMenu.AddGroupLabel("Condemn");
-            CondemnMenu.Add("Condemnmode", new ComboBox("Condemn Mode", 3, "Best", "New", "Marksman", "Shine", "Aka"));
+            CondemnMenu.AddLabel("Shine + Aka disabled for now. Use Marksman.");
+            CondemnMenu.Add("Condemnmode", new ComboBox("Condemn Mode", 2, "Best", "New", "Marksman", "Shine(disabled)", "Aka(disabled)"));
             CondemnMenu.Add("UseEauto", new CheckBox("Use auto E?"));
             CondemnMenu.Add("UseEc", new CheckBox("Only Stun current target?", false));
             CondemnMenu.Add("condemnPercent", new Slider("Condemn Hitchance %", 33, 1));
             CondemnMenu.Add("pushDistance", new Slider("Condemn Push Distance", 420, 350, 470));
             CondemnMenu.Add("noeaa", new Slider("No E if target can be killed with x AA´s", 0, 0, 4));
             CondemnMenu.Add("trinket", new CheckBox("Use trinket bush?"));
+            CondemnMenu.Add("j4flag", new CheckBox("Condemn to J4 Flags?"));
             CondemnMenu.AddGroupLabel("Mechanics");
             CondemnMenu.Add("flashe", new KeyBind("Flash Condemn!", false, KeyBind.BindTypes.HoldActive, 'Y'));
             CondemnMenu.Add("insece", new KeyBind("Flash Insec!", false, KeyBind.BindTypes.HoldActive, 'Z'));
@@ -238,10 +240,10 @@ namespace Aka_s_Vayne_reworked
             ItemMenu.AddGroupLabel("Items");
             ItemMenu.AddLabel("Ask me if you need more Items.");
             ItemMenu.Add("botrk", new CheckBox("Use Botrk & Bilge"));
-            ItemMenu.Add("you", new CheckBox("Use Yoummmus"));
-            ItemMenu.Add("yous", new Slider("if distance >", 1000, 0, 1500));
             ItemMenu.Add("autopotion", new CheckBox("Auto Healpotion"));
-            ItemMenu.Add("autopotionhp", new Slider("HpPot if hp =>", 60));
+            ItemMenu.Add("autopotionhp", new Slider("HpPot if hp <=", 60));
+            ItemMenu.Add("autobiscuit", new CheckBox("Auto Biscuit"));
+            ItemMenu.Add("autobiscuithp", new Slider("Biscuit if hp <=", 60));
             ItemMenu.AddGroupLabel("Summoners");
             ItemMenu.AddLabel("Ask me if you need more Summoners.");
             ItemMenu.Add("heal", new CheckBox("Heal"));
@@ -250,7 +252,7 @@ namespace Aka_s_Vayne_reworked
             ItemMenu.Add("hpally", new Slider("Heal if ally HP <=", 20, 0, 100));
             ItemMenu.AddGroupLabel("Qss");
             ItemMenu.Add("qss", new CheckBox("Use Qss"));
-            ItemMenu.Add("delay", new Slider("Delay", 1000, 0, 2000));
+            ItemMenu.Add("delay", new Slider("Delay", 100, 0, 2000));
             ItemMenu.Add("Blind",
                 new CheckBox("Blind", false));
             ItemMenu.Add("Charm",
