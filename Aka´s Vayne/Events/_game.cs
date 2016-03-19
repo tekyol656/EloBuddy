@@ -20,14 +20,11 @@ namespace Aka_s_Vayne_reworked.Events
 
         public static void AAReset()
         {
-            var Target = TargetSelector.GetTarget((int)Variables._Player.GetAutoAttackRange(),
-DamageType.Physical);
-
-            if (Target != null)
+            if (Functions.Events._game.Target != null)
             {
                 if (Game.Time * 1000 > Variables.lastaa + Variables._Player.AttackDelay * 1000 - Game.Ping * 2.15)
                 {
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, Target);
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, Functions.Events._game.Target);
                 }
                 else if (Game.Time * 1000 > Variables.lastaa + Variables._Player.AttackCastDelay * 1000 - Game.Ping / 2.15 + 50f && Game.Time * 1000 > Variables.lastmove + 150f)
                 {
@@ -47,24 +44,25 @@ DamageType.Physical);
 
         public static void Customorbwalker()
         {
-            var target = TargetSelector.GetTarget((int)Variables._Player.GetAutoAttackRange(),
-    DamageType.Physical);
-
-            if (target != null)
+            if (Variables.stopmove && Game.Time * 1000 > Variables.lastaaclick + ObjectManager.Player.AttackCastDelay * 1000 + 25f)
             {
-                if (Game.Time * 1000 > Variables.lastaa + Variables._Player.AttackDelay * 1000 - Game.Ping * 2)
-                {
-                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-                }
-                else
-                {
-                    Functions.Events._game.Move(50f, 175f);
-                }
-                Functions.Events._game.Botrk2(target);
+                Variables.stopmove = false;
             }
-            else
+
+            if (!Variables.stopmove && Game.Time * 1000 > Variables.lastaa + ObjectManager.Player.AttackCastDelay * 1000 - Game.Ping / 2.15 + ObjectManager.Player.AttackSpeedMod * 15.2 && Game.Time * 1000 > Variables.lastmove + 150f)
             {
-                Functions.Events._game.Move(50f, 175f);
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                Variables.lastmove = Game.Time * 1000;
+            }
+
+            if (Functions.Events._game.Target != null)
+            {
+                if (Game.Time * 1000 > Variables.lastaa + ObjectManager.Player.AttackDelay * 1000 - Game.Ping * 2.15)
+                {
+                    Variables.stopmove = true;
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, Functions.Events._game.Target);
+                }
+                Functions.Events._game.Botrk2(Functions.Events._game.Target);
             }
         }
     
@@ -233,11 +231,7 @@ DamageType.Physical);
             void EloBuddyOrbDisabler()
 
         {
-            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) ||
-                Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) ||
-                Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) ||
-                Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) ||
-                Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
+            if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LastHit) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.JungleClear) || Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Flee))
             {
                 if (Orbwalker.DisableAttacking)
                 {

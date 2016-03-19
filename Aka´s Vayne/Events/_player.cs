@@ -11,6 +11,10 @@ namespace Aka_s_Vayne_reworked.Events
         {
             if (sender.IsMe && args.Order.HasFlag(GameObjectOrder.AttackUnit))
             {
+                if (Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Functions.Events._game.Target == null)
+                {
+                    Variables.stopmove = false;
+                }
                 Variables.lastaaclick = Game.Time * 1000;
             }
 

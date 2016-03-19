@@ -29,7 +29,7 @@ namespace Aka_s_Vayne_reworked.Modes
             if (Functions.Modes.Combo.AfterAttack && MenuManager.ComboMenu["UseQwhen"].Cast<ComboBox>().CurrentValue == 0)
             {
                 if (target == null) return;
-                QLogic.PreCastTumble(target);
+                QLogic.OnCastTumble(target, Game.CursorPos);
 
             }
 

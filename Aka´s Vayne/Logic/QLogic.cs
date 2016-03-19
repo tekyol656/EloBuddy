@@ -146,7 +146,7 @@ namespace AddonTemplate.Logic
             OnCastTumble(target, QPosition);
         }
 
-        private static void OnCastTumble(Obj_AI_Base target, Vector3 position)
+        public static void OnCastTumble(Obj_AI_Base target, Vector3 position)
         {
             var mode = MenuManager.ComboMenu["Qmode"].Cast<ComboBox>().CurrentValue;
             var afterTumblePosition = Variables._Player.ServerPosition.Extend(position, 300f);
