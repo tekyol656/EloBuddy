@@ -27,9 +27,6 @@ namespace AkaYasuo
             DogeMenu,
             ItemMenu;
 
-        public static string[] gapcloser;
-        public static string[] interrupt;
-        public static string[] notarget;
         public static Dictionary<string, Menu> SubMenu = new Dictionary<string, Menu>() { };
 
         public static void Load()
@@ -162,25 +159,18 @@ namespace AkaYasuo
                     Variables.abilitySequence = new[] { 3, 1, 2, 3, 3, 4, 3, 1, 3, 1, 4, 1, 1, 2, 2, 4, 2, 2 };
                     break;
             }
-            var skin = MiscMenu.Add("sID", new Slider("Skin", 0, 0, 2));
-            var sID = new[] { "Classic", "High-Noon Yasuo", "Project Yasuo" };
-            skin.DisplayName = sID[skin.CurrentValue];
-
-            skin.OnValueChange +=
-                delegate (ValueBase<int> sender, ValueBase<int>.ValueChangeArgs changeArgs)
-                {
-                    sender.DisplayName = sID[changeArgs.NewValue];
-                };
+            MiscMenu.Add("skinhack", new CheckBox("Activate Skin hack"));
+            MiscMenu.Add("skinId", new ComboBox("Skin Hack", 0, "Default", "High Noon Yasuo" , "Project Yasuo", "Blood Moon Yasuo"));
         }
 
         public static void Drawingmenu()
         {
             DrawingMenu = YMenu.AddSubMenu("Drawing", "Drawing");
             DrawingMenu.AddGroupLabel("Drawings");
-            DrawingMenu.Add("DrawQ", new CheckBox("Draw Q"));
-            DrawingMenu.Add("DrawQ3", new CheckBox("Draw Q3"));
-            DrawingMenu.Add("DrawE", new CheckBox("Draw E"));
-            DrawingMenu.Add("DrawR", new CheckBox("Draw R"));
+            DrawingMenu.Add("DrawQ", new CheckBox("Draw Q", false));
+            DrawingMenu.Add("DrawQ3", new CheckBox("Draw Q3", false));
+            DrawingMenu.Add("DrawE", new CheckBox("Draw E", false));
+            DrawingMenu.Add("DrawR", new CheckBox("Draw R", false));
             DrawingMenu.Add("DrawSpots", new CheckBox("Draw Walljump spots"));
         }
 
